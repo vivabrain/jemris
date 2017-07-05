@@ -1,0 +1,191 @@
+/**
+  \page ug_main User guide
+  \mainpage Welcome
+
+This is the automated doxygen documentation of the JEMRIS project.\n
+  \n
+The manual intends to give a brief hands-on introduction. \n
+  \n
+  \n
+ \subpage ug_intro \n \n
+ \subpage ug_downl \n \n
+ \subpage ug_install \n \n
+ \subpage ug_uis \n \n
+ \subpage ug_tutor \n \n
+ \subpage ug_ex \n \n
+  \n
+  \n
+  \n
+  \n
+  \n
+  \n
+  See also <a href="http://www.jemris.org">www.jemris.org</a>
+*/
+
+/**
+ \page ug_downl  Download
+
+We have two small favours to ask:\n
+\n
+Please, let us know that you are downloading jemris by sending an E-Mail to
+<a href="mailto:tony.stoecker@dzne.de?subject=jemris download">Tony Stoecker</a>.
+In return, we will keep you up to date of updates and bug fixes. 
+\n
+And please, help us with improving the software by announcing bugs.
+<ul>
+	<li> <b> Sources </b>
+	     <ul>
+		<li> <a href="../get/jemris-2.7.2-src.tar.gz">jemris-2.7.2-src.tar.gz</a>
+		<li> md5sum: e4ac96de6ff97b5927d4dc76ff913739
+		<li> shasum: 1bdf0bcbd2ef8d362e19031f191d17dad3288ab8
+	     </ul>
+
+	<li> <b> Ubuntu Binary (14.10 64bit) </b>
+	     <ul>
+		<li> <a href="../get/jemris-2.7.2-Linux.deb">jemris_2.7.2-Linux.deb</a>
+		<li> md5sum: d1cba8f4378a3d26bdab16711fe3ef35
+		<li> shasum: 80649bec4042ae207f76afa30049b8ba7757b6d4
+	     </ul>
+
+	<li> <b> Mac Binary Mac </b>
+	     <ul>
+		<li> <a href="../get/jemris-2.7.2.mpkg.zip">jemris-2.7.2.mpkg.zip</a>
+		<li> md5sum: 504e1d62ff890758ddd0762fda284ea2
+		<li> shasum: c2772285b1a04989642c8c01406c92e61075ef82  
+	     </ul>
+
+	<li> <b> Windows Binary </b>
+	     <ul>
+		<li> <a href="../get/jemris-2.7.2.msi">jemris-2.7.2.msi</a>
+        <br/> Parallel jemris requires <a href="http://www.mcs.anl.gov/research/projects/mpich2/downloads/tarballs/1.4.1p1/mpich2-1.4.1p1-win-ia32.msi">MPICH2 IA32 1.4.1p1</a>.<br/>
+             <a href="ug_mpiwin.html">Install guide</a> for Windows Vista, 7 &amp; 8.
+		<li> md5sum: f178c6c161f5adfa1a2800b2fe3bd831
+		<li> shasum: cf995cc47b488e7acffdefda63d888d0efe6ae6d
+	     </ul>
+</ul>
+
+*/
+
+/**
+ \page ug_mpiwin MPICH2 for Windows 
+Installing and running MPICH2 under Windows 64 >= Vista for a single computer with multiple cores
+\n
+<b>Installation</b>
+<ul>
+<li>Install msi file accepting the license and so on.</li>
+<li>Accept the preset passphrase for now</li>
+<li>On the next mask choose install for "Everyone"</li>
+<li>Confirm installation</li>
+</ul>
+\n
+<b>Configuration</b>
+<ul>
+<li>On the start menu right-click "Computer"</li>
+<li>From the list choose "Properties"</li>
+<li>From the list "Control Panel Home" on the left of the new window pick "Advanced system settings"</li>
+<li>Near the bottom click on "Environment Variables"</li>
+<li>Add to if existing or create the PATH variable to include C:\Program Files (x86)\MPICH2\bin or approriate path.</li>
+<li>Confirm with 3 times OK</li>
+<li>Open a command prompt by right clicking its symbol and choosing from the list "Run as administrator"
+<li>Execute including the quotation marks smpd -passphrase "yourpass" -install</li>
+<li>You should read somthing about the success.</li>
+<li>Close that command prompt again and open a new one with user priviledges.</li>
+<li>Execute now mpiexec -np 4 hostname</li>
+<li>You should now see the hostname of your computer 4 times.
+<li>At this point all ist setup and you should be able to use parallel jemris.</li>
+</ul>
+\n
+Should you want to connect multiple computers running Windows to perform HPC computing with jemris, be assured of our empathy. We wish you the best of luck. You will most centainly need some kind of Windows domain authentication hastle-hurdle-trap-pitfall.
+*/
+
+
+
+/**
+ \page ug_uis User Interfaces
+JEMRIS was developed in C++ to achieve usability as well as performance.
+It can be used from the command line, where  the configuration of the MR-simulation is done via several XML files.
+
+Additionally, three Matlab GUIs were developed: one for interactively designing the MRI sequence,
+another for defining the coil configuration, and one for the set-up and execution of the main simulator, respectively. 
+All Matlab GUIs follow the same procedure: construct a valid XML file from the user input, then call the external
+JEMRIS executables to compute the data, and finally read and visualise the result.
+
+Before starting the Matlab GUIs, the directory in which the JEMRIS m-files are located has to be added to
+the Matlab search path.
+Use e.g. <I>"addpath('<dir>')"</I>, where <I>dir=/usr/local/share/jemris/matlab</I> in a standard linux installation.
+
+ \subpage ug_JEMRIS_seq  \n 
+ Comprehensive GUI for setup of sequences. \n\n
+ \subpage ug_JEMRIS_sim  \n 
+ User interface for control of the simulation parameters as sample, noise etc. \n\n
+ \subpage ug_JEMRIS_txrx \n 
+ User interface for setting up transmit and receive arrays. \n\n
+ \subpage ug_command_line \n 
+ The command line. Learn to control jemris for batch submission etc. \n\n
+ */
+
+/**
+ \page ug_tutor Tutorials
+ \subpage ug_tutorial_epi_seq \n \n
+ \subpage ug_tutorial_epi_sim \n \n
+ \subpage ug_tutorial_selex1 \n \n
+ \subpage ug_tutorial_selex2 \n \n
+ */
+
+/**
+ \page ug_ex Examples
+ Detailed instructions to reproduce the simulations in the MRM jemris paper (1). \n
+ \n
+ \subpage ug_example_artifacts \n \n
+ \subpage ug_example_nlg \n \n
+ \subpage ug_example_ktblast \n \n
+ \subpage ug_example_selex \n \n
+ \n
+ \n
+ (1) Tony Stöcker, Kaveh Vahedipour, Daniel Pflugfelder, N. Jon Shah. High-performance computing MRI simulations. Magnetic Resonance in Medicine. 2010, 64(1), 186 - 193.\n
+ */
+
+
+/**
+ \page ug_about About JEMRIS
+\section ug_version Version
+
+JEMRIS Version 2.7.2\n
+Copyright (C) 2006-2015  Tony Stöcker, Kaveh Vahedipour, Daniel Pflugfelder \n
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA\n
+\n
+
+\section ug_contact Contact
+
+JEMRIS is developed and maintained by ...
+
+Tony Stöcker, project founder (tony.stoecker(at)dzne.de) \n
+Framework design, sequence and solver implementation. \n
+\n
+Kaveh Vahedipour (kaveh (at) codeare.org) \n
+Framework design, parallel TX/RX, package maintenance, supercomputer implementation. \n
+\n
+Dr. Daniel Pflugfelder (d.pflugfelder(at)fz-juelich.de) \n
+MPI parallelisation, performance debugging, code optimisation, Temporal variations, Diffusion. \n
+\n
+
+\section ug_lit Reference
+
+If you use JEMRIS for research publications, please cite this paper:\n
+Tony Stöcker, Kaveh Vahedipour, Daniel Pflugfelder, N. Jon Shah. High-performance computing MRI simulations. Magnetic Resonance in Medicine. 2010, 64(1), 186 - 193.
+
+
+*/
