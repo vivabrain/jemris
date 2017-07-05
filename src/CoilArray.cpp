@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,9 @@ CoilArray::CoilArray () {
     m_dom_doc = 0;
     m_mode    = RX;
     m_signal_prefix = "signals";
-	m_senmap_prefix = "sensmaps";
+    m_senmap_prefix = "sensmaps";
+    m_signal_output_dir = "";
+    m_senmap_output_dir = "";
     m_cpf     = new CoilPrototypeFactory();
     m_xio     = new XMLIO();
 
@@ -157,7 +159,7 @@ IO::Status CoilArray::DumpSignals (string prefix, bool normalize) {
 		}*/
 
 
-	BinaryContext bc (m_signal_prefix+".h5", IO::OUT);
+	BinaryContext bc (m_signal_output_dir + m_signal_prefix + ".h5", IO::OUT);
 	NDData<double> di;
 	std::string URL, URN;
 
@@ -218,7 +220,7 @@ IO::Status CoilArray::DumpSignals (string prefix, bool normalize) {
 /**********************************************************/
 IO::Status CoilArray::DumpSensMaps (bool verbose) {
 
-	BinaryContext bc (m_senmap_prefix+".h5", IO::OUT);
+	BinaryContext bc (m_senmap_output_dir + m_senmap_prefix+".h5", IO::OUT);
 	if (bc.Status() != IO::OK)	return bc.Status();
 
 	if (verbose) cout << "dumping sensitivity maps to " << m_senmap_prefix << ".h5 ...\n";

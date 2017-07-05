@@ -1,8 +1,7 @@
 General Information
 ===================
 
-JEMRIS, which stands for "Juelich Extensible MRI Simulator", is 
-a general MRI simulator.
+JEMRIS is a general MRI simulation framework.
 
 The general process of simulation consists of preparation by choice or
 implementation of sequence, sample and coil setup and the invocation
@@ -42,7 +41,7 @@ the root directory of this package.
 Contact
 =======
 
-This package is maintained by Kaveh Vahedipour <tony.stoecker@dzne.de>.
+This package is maintained by Kaveh Vahedipour <k.vahedipour@fz-juelich.de>.
 Please find problem specific contact addresses on http://www.jemris.org.
 
 
@@ -56,7 +55,7 @@ How to report bugs
 ==================
 
 If you have identified a bug in JEMRIS you are welcome to send a detailed
-bug report to <tony.stoecker@dzne.de>. Please include
+bug report to <k.vahedipour@fz-juelich.de>. Please include
 
 * Information about your build configuration
 

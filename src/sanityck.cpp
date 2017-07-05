@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -38,10 +38,11 @@ using namespace std;
 
 /****************************************************/
 void usage () {
-  cout << endl << "sanityck usage " << endl << endl;
+	cout << endl << "sanityck usage " << endl << endl;
 	cout   << "  sanityck <path_to_example_data> 1 : creates tree-dumps and seq-diagrams for some sequences" << endl;
-	cout   << "  sanityck <path_to_example_data> 2 : performs simulation on a small sample for all these sequences " << endl;
-	cout   << "  sanityck <path_to_example_data> 3 : creates sensitivity maps" << endl << endl;
+	cout   << "  sanityck <path_to_example_data> 2 : performs simulation on a small sample for all these sequences" << endl;
+	cout   << "  sanityck <path_to_example_data> 3 : creates sensitivity maps" << endl;
+	cout   << "  sanityck <path_to_example_data> 4 : exports some sequences in pulseq format for scanner execution" << endl << endl;
 }
 
 /****************************************************/
@@ -154,21 +155,22 @@ double compare_hdf5_fields(string file1, string file2, string field){
 /****************************************************/
 bool CheckSeqs(string path, vector<string> seq){
 
-	SequenceTree* seqTree;
 	bool status=true;
 
 	cout << endl << "Test directory: " << path << endl;
 	cout << endl << "Test Case 1: producing tree-dumps and sequence diagrams" << endl;
 	cout << "======================================================="<< endl << endl;
 
+
 	for (unsigned int i=0;i<seq.size();i++) {
-		seqTree = SequenceTree::instance();
-		seqTree->Initialize(path+seq[i]);
 
-		if (seqTree->GetStatus()) {
+		SequenceTree seqTree;
+		seqTree.Initialize(path+seq[i]);
 
-			seqTree->Populate();
-			ConcatSequence* CS = seqTree->GetRootConcatSequence();
+		if (seqTree.GetStatus()) {
+
+			seqTree.Populate();
+			ConcatSequence* CS = seqTree.GetRootConcatSequence();
 			printf("%02d. %15s | ",i+1,seq[i].c_str());
 
 			//sequence-diagram
@@ -208,10 +210,9 @@ bool CheckSeqs(string path, vector<string> seq){
 				status = false;
 				cout << "is NOT ok " << endl;
 			}
-
-			delete seqTree;
 		}
 	}
+
 	return status;
 
 }
@@ -228,25 +229,23 @@ bool CheckSigs(string path, vector<string> seq){
 
 	for (unsigned int i=0;i<seq.size();i++) {
 
-		Simulator* sim = new Simulator(  path+"/approved/simu.xml",path+"/approved/sample.h5",
-			                             path+"/approved/uniform.xml",path+"/approved/uniform.xml",
-			                             path+seq[0],"CVODE");
+		Simulator sim(  path+"/approved/simu.xml",path+"/approved/sample.h5",
+			            path+"/approved/uniform.xml",path+"/approved/uniform.xml",
+			            path+seq[0],"CVODE");
 
-		if (!sim->GetStatus()) {
+		if (!sim.GetStatus()) {
 			cout << "can not initialize Simulator. exit.\n";
 			return false;
 		}
 		printf("%02d. %15s | ",i+1,seq[i].c_str());
 
-		delete SequenceTree::instance();
-		sim->SetSequence(path+seq[i]);
+		sim.SetSequence(path+seq[i]);
 		string binfile = seq[i];
 		binfile.replace(binfile.find(".xml",0),4,"");
 		binfile +="_signal";
-		sim->GetRxCoilArray()->SetSignalPrefix(path+binfile);
-		sim->GetModel()->SetDumpProgress(false);
-		sim->Simulate();
-		delete sim;
+		sim.GetRxCoilArray()->SetSignalPrefix(path+binfile);
+		sim.GetModel()->SetDumpProgress(false);
+		sim.Simulate();
 
 		printf("%18s (sig-simu)",binfile.c_str());
 
@@ -280,20 +279,20 @@ bool CheckSens(string path, vector<string> coils){
 
 	for (unsigned int i=0;i<coils.size();i++) {
 
-		CoilArray* ca = new CoilArray();
-		ca->Initialize(path+coils[i]);
+		CoilArray ca;
+		ca.Initialize(path+coils[i]);
 		string binfile = coils[i];
 		binfile.replace(binfile.find(".xml",0),4,"");
-		ca->SetSenMaplPrefix(path+binfile);
-		int out = ca->Populate();
+		ca.SetSenMaplPrefix(path+binfile);
+		int out = ca.Populate();
 		status = ( (out==0) && status );
-		out = ca->DumpSensMaps(false);
+		out = ca.DumpSensMaps(false);
 		status = ( (out==0) && status) ;
 
 		printf("%02d. %15s | %18s (sens-dump) ",i+1,coils[i].c_str(),binfile.c_str());
 
 		double d = 0.0;
-		for (unsigned int j=0; j<ca->GetSize(); j++) {
+		for (unsigned int j=0; j<ca.GetSize(); j++) {
 			stringstream sstr;
 			sstr << setw(2) << setfill('0') << j;
 			double m = compare_hdf5_fields(	path+binfile+".h5",
@@ -310,13 +309,53 @@ bool CheckSens(string path, vector<string> coils){
 			d += m+p;
 		}
 
-		delete ca;
-
 		if (d > 0.1 ) {
 			status = false;
 			printf("is NOT ok (e=%7.4f %%) \n",d);
 		} else
 			printf("is ok (e=%7.4f %%) \n",d);
+	}
+
+	return status;
+
+}
+
+/****************************************************/
+bool CheckOutput(string path, vector<string> seq){
+
+	bool status=true;
+
+	cout << endl << "Test directory: " << path << endl;
+	cout << endl << "Test Case 4: output sequence for hardware execution" << endl;
+	cout << "======================================================="<< endl << endl;
+
+
+	for (unsigned int i=0;i<seq.size();i++) {
+
+		SequenceTree seqTree;
+		seqTree.Initialize(path+seq[i]);
+
+		if (seqTree.GetStatus()) {
+
+			seqTree.Populate();
+			ConcatSequence* CS = seqTree.GetRootConcatSequence();
+			printf("%02d. %15s | ",i+1,seq[i].c_str());
+
+			//sequence-diagram
+			string seqfile = seq[i];
+			seqfile.replace(seqfile.find("xml",0),3,"seq");
+			map<string,string> defs;
+			CS->OutputSeqData (defs, path, seqfile);
+
+			printf("%15s (seq-output) ",seqfile.c_str());
+
+			if (compare_text_files(path+seqfile,path+"approved/"+seqfile))
+				cout << "is ok " << endl;
+			else {
+				status = false;
+				cout << "is NOT ok " << endl;
+			}
+		}
 	}
 
 	return status;
@@ -344,6 +383,15 @@ int main (int argc, char *argv[]) {
 	seq.push_back("sli_sel.xml");
 	seq.push_back("var_dur.xml");
 	seq.push_back("extpulses.xml");
+	seq.push_back("epi_modular.xml");
+	seq.push_back("trapezoid.xml");
+
+	//sequences to output for scanner execution
+	vector<string> outseq;
+	outseq.push_back("gre.xml");
+	outseq.push_back("epi.xml");
+	outseq.push_back("trapezoid.xml");
+	outseq.push_back("sli_sel.xml");
 
 	//coils to test
 	vector<string> coils;
@@ -356,6 +404,7 @@ int main (int argc, char *argv[]) {
 	case(1): status = CheckSeqs(path,seq); break;	//test sequence diagrams for all sequences
 	case(2): status = CheckSigs(path,seq); break;	//test signal simulations for all sequences
 	case(3): status = CheckSens(path,coils); break;	//test sensitivity maps for all coils
+	case(4): status = CheckOutput(path,outseq); break;  //test sequence output for execution
 	default: cout << "\nsanityck: unknown input\n\n"; break;
 	}
 

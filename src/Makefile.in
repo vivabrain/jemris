@@ -107,24 +107,26 @@ am__objects_1 = AnalyticCoil.$(OBJEXT) AnalyticGradPulse.$(OBJEXT) \
 	BiotSavartLoop.$(OBJEXT) Bloch_McConnell_CV_Model.$(OBJEXT) \
 	Bloch_CV_Model.$(OBJEXT) Coil.$(OBJEXT) CoilArray.$(OBJEXT) \
 	CoilPrototypeFactory.$(OBJEXT) ConcatSequence.$(OBJEXT) \
-	ConstantGradPulse.$(OBJEXT) DOMTreeErrorReporter.$(OBJEXT) \
-	DelayAtomicSequence.$(OBJEXT) DynamicVariables.$(OBJEXT) \
-	EddyPulse.$(OBJEXT) EmptyPulse.$(OBJEXT) \
-	ExternalCoil.$(OBJEXT) ExternalPulseData.$(OBJEXT) \
-	ExternalGradPulse.$(OBJEXT) ExternalRFPulse.$(OBJEXT) \
-	GaussianRFPulse.$(OBJEXT) GradPulse.$(OBJEXT) \
-	HardRFPulse.$(OBJEXT) HDF5IO.$(OBJEXT) IdealCoil.$(OBJEXT) \
+	ConstantGradPulse.$(OBJEXT) ContainerSequence.$(OBJEXT) \
+	DOMTreeErrorReporter.$(OBJEXT) DelayAtomicSequence.$(OBJEXT) \
+	DynamicVariables.$(OBJEXT) EddyPulse.$(OBJEXT) \
+	EmptyPulse.$(OBJEXT) ExternalCoil.$(OBJEXT) \
+	ExternalPulseData.$(OBJEXT) ExternalGradPulse.$(OBJEXT) \
+	ExternalRFPulse.$(OBJEXT) GaussianRFPulse.$(OBJEXT) \
+	GradPulse.$(OBJEXT) HardRFPulse.$(OBJEXT) HDF5IO.$(OBJEXT) \
+	IdealCoil.$(OBJEXT) Container.$(OBJEXT) \
 	Microstructure.$(OBJEXT) MicrostructureBoxes.$(OBJEXT) \
 	MicrostructureCrossingFiber.$(OBJEXT) \
 	MicrostructureKissingFiber.$(OBJEXT) \
 	MicrostructureSingleFiber.$(OBJEXT) Model.$(OBJEXT) \
 	Module.$(OBJEXT) ModulePrototypeFactory.$(OBJEXT) \
-	Parameters.$(OBJEXT) Prototype.$(OBJEXT) \
-	PrototypeFactory.$(OBJEXT) Pulse.$(OBJEXT) RFPulse.$(OBJEXT) \
-	RepIter.$(OBJEXT) MultiPoolSample.$(OBJEXT) Sample.$(OBJEXT) \
-	SampleReorderShuffle.$(OBJEXT) SechRFPulse.$(OBJEXT) \
-	Sequence.$(OBJEXT) SequenceTree.$(OBJEXT) Signal.$(OBJEXT) \
-	SimpleIO.$(OBJEXT) Simulator.$(OBJEXT) SincRFPulse.$(OBJEXT) \
+	OutputSequenceData.$(OBJEXT) Parameters.$(OBJEXT) \
+	Prototype.$(OBJEXT) PrototypeFactory.$(OBJEXT) Pulse.$(OBJEXT) \
+	RFPulse.$(OBJEXT) RepIter.$(OBJEXT) MultiPoolSample.$(OBJEXT) \
+	Sample.$(OBJEXT) SampleReorderShuffle.$(OBJEXT) \
+	SechRFPulse.$(OBJEXT) Sequence.$(OBJEXT) \
+	SequenceTree.$(OBJEXT) Signal.$(OBJEXT) SimpleIO.$(OBJEXT) \
+	Simulator.$(OBJEXT) SincRFPulse.$(OBJEXT) \
 	SpiralGradPulse.$(OBJEXT) StrX.$(OBJEXT) TPOI.$(OBJEXT) \
 	Trajectory.$(OBJEXT) Trajectory1D.$(OBJEXT) \
 	TrajectoryDiffusion.$(OBJEXT) TrajectoryInterface.$(OBJEXT) \
@@ -521,7 +523,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TESTS = testsequences.sh testsignals.sh testcoils.sh $(am__append_2)
+TESTS = testsequences.sh testsignals.sh testcoils.sh testoutput.sh \
+	$(am__append_2)
 AM_CXXFLAGS = $(OPENMP_CXXFLAGS)
 SOURCES = AnalyticCoil.cpp AnalyticCoil.h AnalyticGradPulse.cpp \
 	AnalyticGradPulse.h AnalyticPulseShape.cpp \
@@ -534,6 +537,7 @@ SOURCES = AnalyticCoil.cpp AnalyticCoil.h AnalyticGradPulse.cpp \
 	CoilArray.cpp CoilArray.h CoilPrototypeFactory.cpp \
 	CoilPrototypeFactory.h ConcatSequence.cpp ConcatSequence.h \
 	ConstantGradPulse.cpp ConstantGradPulse.h \
+	ContainerSequence.cpp ContainerSequence.h \
 	DOMTreeErrorReporter.cpp DOMTreeErrorReporter.h Debug.h \
 	Declarations.h DelayAtomicSequence.cpp DelayAtomicSequence.h \
 	DynamicVariables.cpp DynamicVariables.h EddyPulse.cpp \
@@ -542,31 +546,33 @@ SOURCES = AnalyticCoil.cpp AnalyticCoil.h AnalyticGradPulse.cpp \
 	ExternalGradPulse.cpp ExternalGradPulse.h ExternalRFPulse.cpp \
 	ExternalRFPulse.h GaussianRFPulse.cpp GaussianRFPulse.h \
 	GradPulse.cpp GradPulse.h HardRFPulse.cpp HardRFPulse.h \
-	HDF5IO.cpp HDF5IO.h IdealCoil.cpp IdealCoil.h KSpace.h \
-	Microstructure.cpp Microstructure.h MicrostructureBoxes.cpp \
-	MicrostructureBoxes.h MicrostructureCrossingFiber.cpp \
-	MicrostructureCrossingFiber.h MicrostructureKissingFiber.cpp \
-	MicrostructureKissingFiber.h MicrostructureSingleFiber.cpp \
-	MicrostructureSingleFiber.h Model.cpp Model.h Module.cpp \
-	Module.h ModulePrototypeFactory.cpp ModulePrototypeFactory.h \
-	NDData.h Parameters.cpp Parameters.h Prototype.cpp Prototype.h \
-	PrototypeFactory.cpp PrototypeFactory.h Pulse.cpp Pulse.h \
-	RFPulse.cpp RFPulse.h RepIter.cpp RepIter.h \
-	MultiPoolSample.cpp MultiPoolSample.h Sample.cpp Sample.h \
-	SampleReorderShuffle.cpp SampleReorderShuffle.h \
-	SampleReorderStrategyInterface.h SechRFPulse.cpp SechRFPulse.h \
-	Sequence.cpp Sequence.h SequenceTree.cpp SequenceTree.h \
-	Signal.cpp Signal.h SimpleIO.h SimpleIO.cpp Simulator.cpp \
-	Simulator.h SincRFPulse.cpp SincRFPulse.h SpiralGradPulse.cpp \
-	SpiralGradPulse.h StrX.cpp StrX.h TPOI.cpp TPOI.h \
-	Trajectory.cpp Trajectory.h Trajectory1D.cpp Trajectory1D.h \
-	TrajectoryDiffusion.cpp TrajectoryDiffusion.h \
-	TrajectoryEmpty.h TrajectoryInterface.cpp \
-	TrajectoryInterface.h TrajectoryMotion.cpp TrajectoryMotion.h \
-	TrajectoryT2s.cpp TrajectoryT2s.h TrapGradPulse.cpp \
-	TrapGradPulse.h TriangleGradPulse.cpp TriangleGradPulse.h \
-	TxRxPhase.cpp TxRxPhase.h World.cpp World.h XMLIO.cpp XMLIO.h \
-	config.h ginac_functions.h list.h list_c.h rng.cpp rng.h
+	HDF5IO.cpp HDF5IO.h IdealCoil.cpp IdealCoil.h Container.cpp \
+	Container.h KSpace.h Microstructure.cpp Microstructure.h \
+	MicrostructureBoxes.cpp MicrostructureBoxes.h \
+	MicrostructureCrossingFiber.cpp MicrostructureCrossingFiber.h \
+	MicrostructureKissingFiber.cpp MicrostructureKissingFiber.h \
+	MicrostructureSingleFiber.cpp MicrostructureSingleFiber.h \
+	Model.cpp Model.h Module.cpp Module.h \
+	ModulePrototypeFactory.cpp ModulePrototypeFactory.h NDData.h \
+	OutputSequenceData.cpp OutputSequenceData.h Parameters.cpp \
+	Parameters.h Prototype.cpp Prototype.h PrototypeFactory.cpp \
+	PrototypeFactory.h Pulse.cpp Pulse.h RFPulse.cpp RFPulse.h \
+	RepIter.cpp RepIter.h MultiPoolSample.cpp MultiPoolSample.h \
+	Sample.cpp Sample.h SampleReorderShuffle.cpp \
+	SampleReorderShuffle.h SampleReorderStrategyInterface.h \
+	SechRFPulse.cpp SechRFPulse.h Sequence.cpp Sequence.h \
+	SequenceTree.cpp SequenceTree.h Signal.cpp Signal.h SimpleIO.h \
+	SimpleIO.cpp Simulator.cpp Simulator.h SincRFPulse.cpp \
+	SincRFPulse.h SpiralGradPulse.cpp SpiralGradPulse.h StrX.cpp \
+	StrX.h TPOI.cpp TPOI.h Trajectory.cpp Trajectory.h \
+	Trajectory1D.cpp Trajectory1D.h TrajectoryDiffusion.cpp \
+	TrajectoryDiffusion.h TrajectoryEmpty.h \
+	TrajectoryInterface.cpp TrajectoryInterface.h \
+	TrajectoryMotion.cpp TrajectoryMotion.h TrajectoryT2s.cpp \
+	TrajectoryT2s.h TrapGradPulse.cpp TrapGradPulse.h \
+	TriangleGradPulse.cpp TriangleGradPulse.h TxRxPhase.cpp \
+	TxRxPhase.h World.cpp World.h XMLIO.cpp XMLIO.h config.h \
+	ginac_functions.h list.h list_c.h rng.cpp rng.h
 
 #SampleReorderShuffle.cpp SampleReorderShuffle.h
 jemris_SOURCES = $(SOURCES) jemris.cpp
@@ -704,6 +710,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoilPrototypeFactory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConcatSequence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConstantGradPulse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Container.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ContainerSequence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DOMTreeErrorReporter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DelayAtomicSequence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DynamicVariables.Po@am__quote@
@@ -728,6 +736,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ModulePrototypeFactory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mpi2Evolution.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MultiPoolSample.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OutputSequenceData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parameters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Prototype.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PrototypeFactory.Po@am__quote@
@@ -986,6 +995,13 @@ testsignals.sh.log: testsignals.sh
 testcoils.sh.log: testcoils.sh
 	@p='testcoils.sh'; \
 	b='testcoils.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testoutput.sh.log: testoutput.sh
+	@p='testoutput.sh'; \
+	b='testoutput.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

@@ -3,11 +3,11 @@
  */
 
 /*
- *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
- *                                  
+ *  JEMRIS Copyright (C)
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
+ *
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -152,14 +152,15 @@ double DelayAtomicSequence::GetDelay() {
 	}
 	//cout << " delay = " << delay << endl << endl;
 
-
+	// Round delay time up to nearest 10us
+	double delayRounded = round(100.0*fabs(delay))/100.0;
+	delay = delay<0.0 ? -delayRounded : delayRounded;
 
 #ifdef DEBUG
-	cout	<< "  DELAYTOMICSEQUENCE: " << GetName() << " mode = " << mode << " , m_await_time = " << m_await_time
-			<< " , (iS1pos, iMYpos, iS2pos) = (" << iS1pos << "," << iMYpos << "," << iS2pos << ")"
-			<< "  =>  delay = " << dDelayTime << endl;
+	cout	<< "  DELAYTOMICSEQUENCE: " << GetName() << " , m_await_time = " << m_await_time
+			<< " , (iS1pos, iMYpos, iS2pos) = (" << m_iS1pos << "," << m_iMYpos << "," << m_iS2pos << ")"
+			<< "  =>  delay = " << delay << endl;
 #endif
-
 
 	return delay;
 
@@ -189,3 +190,15 @@ string          DelayAtomicSequence::GetInfo () {
 
 }
 
+/***********************************************************/
+void DelayAtomicSequence::CollectSeqData(OutputSequenceData *seqdata) {
+	if (GetHardwareMode()>=0) {
+		vector<Event*> events;
+		DelayEvent *delay = new DelayEvent();
+		delay->m_delay = (long) round(GetDuration()*1e3);
+		events.push_back(delay);
+		seqdata->AddEvents(events, GetDuration());
+		delete delay;
+	}
+
+}

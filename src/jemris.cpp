@@ -6,9 +6,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -30,10 +30,20 @@
 #include <iomanip>
 #include <typeinfo>
 
+#include <unistd.h>
+#include <sys/stat.h>
+#include <cerrno>
+
 #include "Simulator.h"
 #include "SequenceTree.h"
 #include "ConcatSequence.h"
 #include "config.h"
+
+#ifdef WIN32
+ #define MKDIR(S,M)    mkdir(S)
+#else
+ #define MKDIR(S,M)    mkdir(S,M)
+#endif
 
 using namespace std;
 
@@ -49,6 +59,11 @@ void usage () {
 	cout   << "     or c) the sensitivity maps are dumped, respectively." << endl << endl;
 	cout   << "  2. jemris modlist           " << endl;
 	cout   << "     Writes the file mod.xml containing a list of all available modules." << endl << endl;
+	cout   << "  Parameters:" << endl;
+	cout   << "     -o <output_dir>: Output directory" << endl;
+	cout   << "     -f <filename>:   Output filename (without extension)"  << endl;
+	cout   << "     -x: Output sequence file for execution"  << endl;
+	cout   << "     -d <def>=<val>:  Define custom sequence variable"  << endl;
 }
 
 void do_simu (Simulator* sim) {
@@ -79,46 +94,140 @@ int main (int argc, char *argv[]) {
 		return 0;
 	}
 
-	string input (argv[1]);
+	string output_dir("");
+	string filename("");
+	string definition, def_name, def_val;
+	std::size_t pos;
+	map<string,string> scan_defs;
+	bool export_seq=false;
+	opterr = 0;
+	int status;
+
+	int c;
+	while((c = getopt (argc, argv, "f:o:d:x")) != -1)
+	{
+		switch (c)
+		{
+		case 'o':
+			output_dir = optarg;
+			output_dir += "/";
+			status = MKDIR(output_dir.c_str(), 0777);
+			if(status && errno != EEXIST)
+			{
+				cerr << "mkdir failed: Could not create output directory: "
+						<< output_dir << endl;
+				return 1;
+			}
+			break;
+		case 'f':
+			filename = optarg;
+			break;
+		case 'x':
+			export_seq=true;
+			break;
+		case 'd':
+			definition = optarg;
+			pos = definition.find("=");
+			if (pos==std::string::npos) {
+				cerr << "error: Custom scan definitions must be in format: -d <name>=<val>" << endl;
+				return 1;
+			}
+			def_name = definition.substr(0,pos);
+			def_val = definition.substr(pos+1);
+			scan_defs[def_name] = def_val;
+			break;
+		case '?':
+			if (optopt == 'o')
+				cerr << "Option '-o' requires an argument." << endl;
+			if (optopt == 'f')
+				cerr << "Option '-f' requires an argument." << endl;
+			if (optopt == 's')
+				cerr << "Option '-d' requires an argument." << endl;
+			else if (isprint(optopt))
+				cerr << "Unknown option '-" << (char)optopt << "'." << endl;
+			else
+				cerr << "Unknown option character '-" << (char)optopt << "'." << endl;
+			return 1;
+		default:
+			abort();
+		}
+	}
+
+	string input (argv[optind]);
 
 	//CASE 1: Dump list of modules in xml file
 	if (input == "modlist")  {
-		SequenceTree* seqTree = SequenceTree::instance();
-		seqTree->SerializeModules("mod.xml");
-		//delete seqTree;
+		if(filename == "")
+			filename = "mod.xml";
+		else
+			filename += ".xml";
+		SequenceTree seqTree;
+		seqTree.SerializeModules("mod.xml");
 		return 0;
 	}
 
 	//CASE 2: try Dump of seq-diagram from Sequence xml-file
-	SequenceTree* seqTree = SequenceTree::instance();
-	seqTree->Initialize(input);
-	if (seqTree->GetStatus()) {
-		seqTree->Populate();
-		ConcatSequence* seq = seqTree->GetRootConcatSequence();
-		seq->SeqDiag("seq.h5");
-		seq->DumpTree();
-		if (argc==3) seq->WriteStaticXML("jemris_seq.xml");
-		//delete seqTree;
-		return 0;
+	try {
+		SequenceTree seqTree;
+		seqTree.Initialize(input);
+		if (seqTree.GetStatus()) {
+			string baseFilename(filename);
+			if(filename == "")
+				filename = "seq.h5";
+			else
+				filename += ".h5";
+			seqTree.Populate();
+			ConcatSequence* seq = seqTree.GetRootConcatSequence();
+			seq->SeqDiag(output_dir + filename);
+			seq->DumpTree();
+
+			filename = baseFilename;
+			if (export_seq) {
+				if (filename == "")
+					filename = "external.seq";
+				else
+					filename += ".seq";
+				seq->OutputSeqData(scan_defs, output_dir, filename);
+			}
+			return 0;
+		}
+	} catch (...) {
+
 	}
 
-	//CASE 3: try simulation from Simulator xml-file
-	Simulator sim (input);
-	if (sim.GetStatus()) {
-		static clock_t runtime = clock();
-		do_simu(&sim);
-		runtime = clock() - runtime;
-		printf ("Actual simulation took %.2f seconds.\n", runtime / 1000000.0);
-		return 0;
+	//CASE 3: try Dump of sensitivities from CoilArray xml-file
+	try {
+		CoilArray ca;
+		if(filename != "")
+			ca.SetSenMaplPrefix(filename);
+		ca.SetSenMapOutputDir(output_dir);
+
+		ca.Initialize(input);
+		if (ca.Populate() == OK) {
+			ca.DumpSensMaps(true);
+			return 0;
+		}
+	} catch (...) {
+
 	}
 
-	//CASE 4: try Dump of sensitivities from CoilArray xml-file
-	CoilArray* coils = new CoilArray();
-	coils->Initialize(input);
-	if (coils->Populate() == OK) {
-		coils->DumpSensMaps(true);
-		return 0;
+	//CASE 4: try simulation from Simulator xml-file
+	try {
+		Simulator sim (input);
+		if (sim.GetStatus()) {
+			sim.SetOutputDir(output_dir);
+			if(filename != "")
+				sim.SetSignalPrefix(filename);
+			static clock_t runtime = clock();
+			do_simu(&sim);
+			runtime = clock() - runtime;
+			printf ("Actual simulation took %.2f seconds.\n", runtime / 1000000.0);
+			return 0;
+		}
+	} catch (...) {
+
 	}
+
 
 	//OTHERWISE: not a valid input
 	cout << input << " is not a valid input.\n";

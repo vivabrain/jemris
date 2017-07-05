@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@
 Simulator::Simulator() :
 	m_rx_coil_array (0), m_xio(0), m_domtree_error_rep (0), m_dom_doc(0), m_evol(0),
 	m_world (World::instance()), m_model(0), m_tx_coil_array(0), m_sample(0),
-	m_sequence(0), m_state(0) {
+	m_seqtree(0), m_sequence(0), m_state(0), m_signal_prefix("signals"), m_output_dir("") {
 	Simulator ("simu.xml");
 }
 
@@ -48,7 +48,7 @@ Simulator::Simulator() :
 Simulator::Simulator ( const string& fname, const string& fsample, const string& frxarray,
 		const string& ftxarray, const string& fsequence, const string& fmodel) :
 	m_rx_coil_array (0), m_evol(0),	m_world (World::instance()), m_model(0), m_tx_coil_array(0),
-	m_sample(0), m_sequence(0) {
+	m_seqtree(0), m_sample(0), m_sequence(0), m_signal_prefix("signals"), m_output_dir("") {
 
 	m_domtree_error_rep = new DOMTreeErrorReporter;
 	m_xio               = new XMLIO();
@@ -287,46 +287,64 @@ void Simulator::Simulate          (bool bDumpSignal) {
 
 	if (bDumpSignal) {
 		m_rx_coil_array->DumpSignals();
-		m_kspace->Write(m_rx_coil_array->GetSignalPrefix()+".h5", "kspace", "/");
+		m_kspace->Write(m_rx_coil_array->GetSignalOutputDir() + m_rx_coil_array->GetSignalPrefix() + ".h5", "kspace", "/");
 		DeleteTmpFiles();
 	}
 
 }
 
 /**********************************************************/
+void Simulator::SetSignalPrefix(string prefix) {
+
+	m_signal_prefix = prefix;
+	if (m_rx_coil_array != NULL) {
+		m_rx_coil_array->SetSignalPrefix(m_signal_prefix);
+	}
+}
+
+/**********************************************************/
+void Simulator::SetOutputDir(string output_dir) {
+
+	m_output_dir = output_dir;
+	if (m_rx_coil_array != NULL) {
+		m_rx_coil_array->SetSignalOutputDir(m_output_dir);
+	}
+}
+
+/**********************************************************/
 void Simulator::SetSequence       (string seq) {
 
-	SequenceTree* seqTree = SequenceTree::instance();
+	m_seqtree = new SequenceTree;
+
 
 	if ( seq.empty() ) seq = GetAttr (GetElem("sequence"), "uri");
 
-	seqTree->Initialize(seq);
-	seqTree->Populate();
+	m_seqtree->Initialize(seq);
+	m_seqtree->Populate();
 
-	m_sequence = seqTree->GetRootConcatSequence();
+	m_sequence = m_seqtree->GetRootConcatSequence();
 
 	if (m_sequence!=NULL && m_model!=NULL) m_model->SetSequence(m_sequence);
 
+	m_world->pSeqTree        = m_seqtree;
 	m_world->TotalADCNumber  = m_sequence->GetNumOfADCs();
 
 }
 
 /**********************************************************/
 Simulator::~Simulator             () {
+
 	if (m_xio               != NULL) delete m_xio;
 	if (m_domtree_error_rep != NULL) delete m_domtree_error_rep;
 	if (m_rx_coil_array     != NULL) delete m_rx_coil_array;
 	if (m_tx_coil_array     != NULL) delete m_tx_coil_array;
 	if (m_model             != NULL) delete m_model;
 	if (m_sample            != NULL) delete m_sample;
-
-	//the simulator deletes the singletons !
-	if (m_world != NULL) delete m_world;
-
-	SequenceTree* seqTree = SequenceTree::instance();
-	delete seqTree;
+	if (m_seqtree           != NULL) delete m_seqtree;
+	if (m_world             != NULL) delete m_world;
 
 }
+
 /**********************************************************/
 void Simulator::DeleteTmpFiles(){
 	remove(".spins_state.dat");

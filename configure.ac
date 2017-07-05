@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT([jemris], [2.7.2], [tony.stoecker@dzne.de], [jemris])
+AC_INIT([jemris], [2.8.1], [tony.stoecker@dzne.de], [jemris])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
@@ -13,7 +13,7 @@ AC_DEFINE([GIT_COMMIT_DATE], "esyscmd(git log -1 | head -n 3 | grep 'Date:' | se
  | tr -d '\n')", [git HEAD commit date])
 
 # copyright notice
-AC_COPYRIGHT([2007-2015 - Tony Stoecker, Kaveh Vahedipour, Daniel Pflugfelder])
+AC_COPYRIGHT([2007-2014 - Tony Stoecker, Kaveh Vahedipour, Daniel Pflugfelder])
 
 AH_TEMPLATE([CXX], [c++ compiler])
 
@@ -32,13 +32,16 @@ AC_HEADER_STDC
 # Check for the host type
 AC_CANONICAL_HOST
 
+
 # SIMD capabilities
-#case $host in
-#     *x86_64*)
-	AX_EXT
-	CXXFLAGS="${CXXFLAGS} ${SIMD_FLAGS}"
-#     ;;
-#esac
+case $target in
+    *mingw*)
+        ;;
+    *)
+	    AX_EXT
+	    CXXFLAGS="${CXXFLAGS} ${SIMD_FLAGS}"
+        ;;
+esac
 #CXXFLAGS="${CXXFLAGS} -Wno-psabi"
 
 AC_ARG_ENABLE([documentation],
@@ -479,6 +482,6 @@ if test x$mpi = xtrue; then
   CXX=$MPICXX
 fi
 
-AC_CONFIG_FILES([Makefile src/Makefile share/Makefile share/examples/Makefile share/examples/approved/Makefile share/matlab/Makefile share/matlab/JEMRIS_sim.m share/matlab/JEMRIS_seq.m share/matlab/JEMRIS_txrx.m share/matlab/pbs_script.sh doc/doxy.conf doc/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile share/Makefile share/examples/Makefile share/examples/approved/Makefile share/matlab/Makefile share/matlab/JEMRIS_sim.m share/matlab/JEMRIS_seq.m share/matlab/JEMRIS_txrx.m share/matlab/JEMRIS_ContainerSequence.m share/matlab/pbs_script.sh doc/doxy.conf doc/Makefile])
 
 AC_OUTPUT

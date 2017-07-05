@@ -5,9 +5,9 @@ function hpt=seqcad_uitoolbar(hObject,handles)
 
 %
 %  JEMRIS Copyright (C) 
-%                        2006-2014  Tony Stoecker
-%                        2007-2014  Kaveh Vahedipour
-%                        2009-2014  Daniel Pflugfelder
+%                        2006-2015  Tony Stoecker
+%                        2007-2015  Kaveh Vahedipour
+%                        2009-2015  Daniel Pflugfelder
 %                                  
 %
 %  This program is free software; you can redistribute it and/or modify
@@ -53,15 +53,17 @@ for i=1:NM
     end
     %make background white for pulse icons
     if findstr(Modules{i},'PULSE'); B(find(isnan(B)))=1; end
-    %draw button
     handles.hpt{i} = uitoggletool(ht,'CData',B,'TooltipString',['Insert ',ModuleToolTip{i}],'Separator',bsep);
+    if strcmp(handles.Modules{i},'CONTAINERSEQUENCE')
+        set(handles.hpt{i},'visible','off');
+    end
 end
 
 %draw buttons for ERASE, COPY, SWAP modules
 handles.hpt{NM+1} = uitoggletool(ht,'CData',ic.ERASEMODULE,'TooltipString','erase a module','Separator','on');
-COPYMODULE=permute(ic.SWAPMODULES,[2 1 3]);
-handles.hpt{NM+2} = uitoggletool(ht,'CData',COPYMODULE,'TooltipString','copy a module','Separator','on');
+handles.hpt{NM+2} = uitoggletool(ht,'CData',ic.COPYMODULE,'TooltipString','copy a module','Separator','on');
 handles.hpt{NM+3} = uitoggletool(ht,'CData',ic.SWAPMODULES,'TooltipString','swap two modules','Separator','on');
+handles.hpt{NM+4} = uitoggletool(ht,'CData',ic.MOVEMODULE,'TooltipString','move module','Separator','on');
 
 %define callbacks
 for i=1:NM
@@ -70,6 +72,7 @@ end
 set(handles.hpt{NM+1},'OnCallback',{@tbbdf_Erase,handles});
 set(handles.hpt{NM+2},'OnCallback',{@tbbdf_Copy,handles});
 set(handles.hpt{NM+3},'OnCallback',{@tbbdf_Swap,handles});
+set(handles.hpt{NM+4},'OnCallback',{@tbbdf_Move,handles});
 for i=1:length(handles.hpt)
     set(handles.hpt{i},'OffCallback',@tbbdf_Off);
 end
@@ -94,6 +97,11 @@ function tbbdf_Copy(src,eventdata,handles)
  global INSERT_MODULE_NUMBER MODULE1 MODULE2
  INSERT_MODULE_NUMBER=-3; MODULE1=0; MODULE2=0;
 
+ function tbbdf_Move(src,eventdata,handles)
+ tbbdf_common([ ], [ ] ,[ ],handles)
+ global INSERT_MODULE_NUMBER MODULE1 MODULE2
+ INSERT_MODULE_NUMBER=-4; MODULE1=0; MODULE2=0;
+ 
 function tbbdf_Off(src,eventdata)
  global INSERT_MODULE_NUMBER MODULE1 MODULE2
  INSERT_MODULE_NUMBER=0; MODULE1=0; MODULE2=0;

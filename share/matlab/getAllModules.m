@@ -6,9 +6,9 @@ function [modules,params]=getAllModules(Jcall,Jpath)
 
 %
 %  JEMRIS Copyright (C) 
-%                        2006-2014  Tony Stoecker
-%                        2007-2014  Kaveh Vahedipour
-%                        2009-2014  Daniel Pflugfelder
+%                        2006-2015  Tony Stoecker
+%                        2007-2015  Kaveh Vahedipour
+%                        2009-2015  Daniel Pflugfelder
 %                                  
 %
 %  This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@ function [modules,params]=getAllModules(Jcall,Jpath)
 %  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
 
- if ~(strcmp(computer,'PCWIN') || strcmp(computer,'PCWIN64'))
+ if ~isempty(Jcall) && ~(strcmp(computer,'PCWIN') || strcmp(computer,'PCWIN64'))
   [status,dump]=system(sprintf('%s modlist ; mv mod.xml %s',Jcall,Jpath));
  end
 
@@ -38,11 +38,12 @@ function [modules,params]=getAllModules(Jcall,Jpath)
  for i=1:length(S.Children)
     c=S.Children(i);
     
+        
     if strcmp(upper(c.Name),'PARAMETERS')
         [params.a,params.ha]=get_attributes(c.Attributes);
         continue;
     end
-    
+        
     for j=1:length(c.Children)
         cc=c.Children(j);
         modules(end+1).name=cc.Name;

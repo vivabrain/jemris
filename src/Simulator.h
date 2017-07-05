@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -202,6 +202,15 @@ class Simulator {
 	 */
 	void      SetParameter   ();
 
+	/**
+	 * @brief Set output directory
+	 */
+	void      SetOutputDir(string output_dir);
+
+	/**
+	 * @brief Set signal prefix
+	 */
+	void      SetSignalPrefix(string prefix);
 
  private:
 
@@ -216,13 +225,16 @@ class Simulator {
 	DOMDocument*             m_dom_doc;           /**< @brief Simulation file             */
 	Sample*                  m_sample;            /**< @brief Sample                      */
 	World*                   m_world;             /**< @brief World to be simulated       */
-	Model*                   m_model;
-	ConcatSequence*          m_sequence;          /**< @brief Sequece to be simulated     */
+	Model*                   m_model;			  /**< @brief Model to be simulated       */
+	ConcatSequence*          m_sequence;          /**< @brief Sequence to be simulated    */
+	SequenceTree*            m_seqtree;           /**< @brief SequenceTree to be simulated*/
 	XMLIO*                   m_xio;               /**< @brief XML file handler            */
 	CoilArray*               m_tx_coil_array;     /**< @brief Transmit coil array         */
 	CoilArray*               m_rx_coil_array;     /**< @brief Receive coil array          */
 	DOMTreeErrorReporter*    m_domtree_error_rep; /**< @brief DOM tree error reporter     */
 	KSpace<double,4>*        m_kspace;            /**< @brief K-Space                     */
+	string                   m_output_dir;        /**< @brief Output directory            */
+	string                   m_signal_prefix;     /**< @brief Signal prefix               */
 
 };
 

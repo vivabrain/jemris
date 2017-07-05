@@ -4,9 +4,9 @@ function [S,x]=plotSeqTree(S,handles,x,y)
 
 %
 %  JEMRIS Copyright (C) 
-%                        2006-2014  Tony Stoecker
-%                        2007-2014  Kaveh Vahedipour
-%                        2009-2014  Daniel Pflugfelder
+%                        2006-2015  Tony Stoecker
+%                        2007-2015  Kaveh Vahedipour
+%                        2009-2015  Daniel Pflugfelder
 %                                  
 %
 %  This program is free software; you can redistribute it and/or modify
@@ -23,33 +23,40 @@ function [S,x]=plotSeqTree(S,handles,x,y)
 %  along with this program; if not, write to the Free Software
 %  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-global MODULE_TYPE_COUNTER
+global MODULE_TYPE_COUNTER 
 
 dy=.5; dx=.4; dr=.15; t=[0:.1:2*pi]; X=1.2*dr*cos(t); Y=1.2*dr*sin(t);
 
-if nargin<3 %the Parameters node
+if nargin<3 %the root node (Paramter or ContainerSequence)
   if nargin==1,handles=[];end
-  x=1;y=1.5;C=[1 .7 .4];set(gca,'visible','off','xlim',[-.1 .1],'ylim',[-.1 .1]);
-  MODULE_TYPE_COUNTER=[0 0 0 0];
+  if strcmpi(S.Name,'PARAMETERS')
+      x=1;y=1.5;C=[1 .7 .4];
+  else
+      x=0;y=1.5;C=[1 .4 .4];
+  end
+  set(gca,'visible','off','xlim',[-.1 .1],'ylim',[-.1 .1]);
+  MODULE_TYPE_COUNTER=[0 0 0 0 0];
 else
  if (x==1 && y==1),x=-1.5;y=1.5; end
  switch upper(S.Name)
     case 'CONCATSEQUENCE'
         C=[1 1 .4];  j=1;
+    case 'CONTAINER'
+        C=[1 .4 .4]; j=2;
     case 'ATOMICSEQUENCE'
-        C=[.6 .6 1]; j=2;
+        C=[.6 .6 1]; j=3;
     case'DELAYATOMICSEQUENCE'
-        C=[.4 1 .4]; j=3;
+        C=[.4 1 .4]; j=4;
     otherwise
-        C=[1 1 1]; X=[-dr -dr dr dr]; Y=[-dr dr dr -dr]; j=4;
+        C=[1 1 1]; X=[-dr -dr dr dr]; Y=[-dr dr dr -dr]; j=5;
  end
  MODULE_TYPE_COUNTER(j)=MODULE_TYPE_COUNTER(j)+1;
 end
 
 % plot static atom to the right (second child of parameters)
-if numel(handles.Seq(1).Children)>1
+if numel(handles.Seq(1).Children)>1 && strcmpi(handles.Seq(1).Name,'PARAMETERS')
  if strcmp(S.Attributes(1).Value,handles.Seq(1).Children(2).Attributes(1).Value)
-    x=1.4;y=1.5;
+    x=1;y=1;
     C=[.5 .5 1];
  end
 end
@@ -60,7 +67,7 @@ S.hp=patch(a,b,C);
 S.hl=line(a,b,'color',[0 0 0],'linewidth',2);
 
 %overlay icon on pulseshapes
-if isempty([findstr('PARAMETER',upper(S.Name)) findstr('SEQUENCE',upper(S.Name))])
+if isempty([findstr('PARAMETER',upper(S.Name)) findstr('SEQUENCE',upper(S.Name)) findstr('CONTAINER',upper(S.Name))])
     try
      eval(['B=handles.icons.',upper(S.Name),';']);
     catch
@@ -104,12 +111,12 @@ if length(ANAME)>3 , ANAME=ANAME(1:3); end
 
 %draw a 'P' in Parameters 
 %if strcmp(upper(S.Name),'PARAMETERS')
-if isempty([findstr('PARAMETER',upper(S.Name)) findstr('SEQUENCE',upper(S.Name))])
-    xs=0.07; ys=0.11; FS=10;
+if isempty([findstr('PARAMETER',upper(S.Name)) findstr('SEQUENCE',upper(S.Name)) findstr('CONTAINER',upper(S.Name))])
+    xs=0.07; ys=0.11; FS=10; fontcolor=[.8 0 0];
 else
-    xs=-0.04-0.01*length(ANAME); ys=-0.02; FS=14;
+    xs=-0.04-0.01*length(ANAME); ys=-0.02; FS=14; fontcolor=[0 0 0];
 end
-S.ht=text(mean(a)+xs,mean(b)+ys,ANAME,'color',[.8 0 0],'fontsize',FS,'fontweight','bold');
+S.ht=text(mean(a)+xs,mean(b)+ys,ANAME,'color',fontcolor,'fontsize',FS,'fontweight','bold');
 
 %end
 
@@ -176,38 +183,81 @@ function call_CurrentModule(S,handles)
 %%%%% button press functions %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 %all ButtonDownFnc's call this routine
 function seqcad_common(src,eventdata,seq,handles) 
 if isempty(handles),return,end
+global CONTAINERSEQFILE OPEN_CONTAINERSEQUENCE
+
+if ~strcmp(get(handles.figure1,'SelectionType'),'open')
+    seqcad_common_single_click(src,eventdata,seq,handles)
+else
+    if strcmpi(seq.Name,'CONTAINER')
+        container_seq_file=''; 
+        for i=1:length(seq.Attributes)
+            if strcmpi(seq.Attributes(i).Name,'FILENAME')
+                container_seq_file = seq.Attributes(i).Value;
+            end
+        end
+        CONTAINERSEQFILE = fullfile(handles.seqdir,container_seq_file);
+        if OPEN_CONTAINERSEQUENCE
+            JEMRIS_ContainerSequence;
+        else
+            seqcad_common_single_click(src,eventdata,seq,handles)
+        end
+    else
+        seqcad_common_single_click(src,eventdata,seq,handles)
+    end
+end
+
+
+function seqcad_common_single_click(src,eventdata,seq,handles) 
 handles.Seq=set_active(seq.hp,handles.Seq);
 guidata(handles.output, handles);
 h=findobj(gca,'Type','Line');
 for i=1:length(h), set(h,'color',[0 0 0],'linewidth',2), end
 set(seq.hl,'color',[1 0 0],'linewidth',3)
-
-global HANDLES;
+global HANDLES OPEN_CONTAINERSEQUENCE
+OPEN_CONTAINERSEQUENCE=1;
 HANDLES=handles;
 %show attributes
-if strcmp(upper(seq.Name),'PARAMETERS')
+if strcmp(upper(seq.Name),'PARAMETERS') 
     set(handles.SeqObjectPanel,'Title','Module: Parameters')
     A=handles.Parameter;
+    Adisp=A;
     HA=handles.ParameterHidden;
 else
     set(handles.SeqObjectPanel,'Title',['Module: ',seq.Name])
     A=handles.Attributes{find(strcmp(handles.Modules,upper(seq.Name)))};
+    Adisp=A;
     HA=handles.HiddenAttributes{find(strcmp(handles.Modules,upper(seq.Name)))};
+    % Replace strings with display names
+    for i=1:length(A)
+        idx=strcmpi(A{i},{seq.Attributes.Name});
+        if any(idx)
+            Adisp{i}=seq.Attributes(idx).DispName;
+        end
+    end
+    for i=1:length(HA)
+        idx=strcmpi(HA{i},{seq.Attributes.Name});
+        if any(idx)
+            HA{i}=seq.Attributes(idx).DispName;
+        end
+    end
 end
 
 if isempty(seq.Attributes)
     seq.Attributes.Name='Name';
+    seq.Attributes.DispName=seq.Attributes.Name;
     seq.Attributes.Value=seq.Name;
 end
 
-for i=1:17
+for i=1:20
     if i>length(A)
         bvis='''off''';
     else
-        eval(['set(handles.SOtag',num2str(i),',''String'',''',A{i},''');'])
+        set(handles.(['SOtag',num2str(i)]),'String',Adisp{i});
+        set(handles.(['SOEtag',num2str(i)]),'UserData',A{i});   % Store actual name in for edit callback
         s=struct2cell(seq.Attributes);
         n=find(strcmp(A{i},squeeze(s(1,:,:))));
         if isempty(n)

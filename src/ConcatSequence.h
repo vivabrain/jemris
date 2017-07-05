@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -139,11 +139,22 @@ class ConcatSequence : public Sequence {
      */
     //virtual bool StaticDOM(DOMDocument* doc, DOMNode* node);
 
+    /**
+     * Get the number of ADCs for this sequence.
+     *
+     * @return The nmuber of ADCs.
+     */
+    virtual long GetNumOfADCs ();
 
     /**
      * @brief Recursively collect sequence data (for plotting the sequence diagram)
      */
     virtual void CollectSeqData (NDData<double>& seqdata, double& t, long& offset);
+
+    /**
+     * @brief Recursively collect sequence data (for running on the scanner)
+     */
+    virtual void CollectSeqData	(OutputSequenceData *seqdata);
 
  protected:
 

@@ -3,11 +3,11 @@
  */
 
 /*
- *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
- *                                  
+ *  JEMRIS Copyright (C)
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
+ *
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ bool    AtomicSequence::Prepare(const PrepareMode mode) {
 
 	ATTRIBUTE("RotAngle"       , m_alpha );
 	ATTRIBUTE("Inclination"    , m_theta );
-	ATTRIBUTE("Azimut"         , m_phi   );
+	ATTRIBUTE("Azimuth"        , m_phi   );
 
 	if (mode != PREP_UPDATE) m_type = MOD_ATOM;
 	if (mode != PREP_UPDATE) GetDuration();
@@ -55,8 +55,14 @@ double AtomicSequence::GetDuration () {
 	vector<Module*> children = GetChildren();
 	double duration = 0.;
 
-	for (unsigned int j=0; j<children.size() ; ++j)
-		duration = fmax( duration, children[j]->GetDuration()+((Pulse*) children[j])->GetInitialDelay() );
+	for (unsigned int j=0; j<children.size() ; ++j) {
+		if (children[j]->GetHardwareMode()<=0) {
+			duration = fmax( duration, children[j]->GetDuration()+((Pulse*) children[j])->GetInitialDelay() );
+		}
+	}
+
+	if (GetHardwareMode()>0)
+		duration = 0;
 
 	DEBUG_PRINT("  AtomicSequence::GetDuration() of " << GetName() <<
 		    " calculates duration = " << dDuration << endl;)
@@ -172,19 +178,21 @@ void AtomicSequence::CollectTPOIs() {
 	for (size_t j = 0; j < children.size(); ++j) {
 
 		p = ((Pulse*)children[j]);
-		d = p->GetInitialDelay();
-		p->SetTPOIs();
+		if (p->GetHardwareMode()<=0) {
+			d = p->GetInitialDelay();
+			p->SetTPOIs();
 
 
-		for (size_t i = 0; i < p->GetNumOfTPOIs(); ++i)  {
+			for (size_t i = 0; i < p->GetNumOfTPOIs(); ++i)  {
 
-			m_tpoi	+ TPOI::set(d + p->GetTPOIs()->GetTime(i),
-					p->GetTPOIs()->GetPhase(i), p->GetTPOIs()->GetMask(i));
+				m_tpoi	+ TPOI::set(d + p->GetTPOIs()->GetTime(i),
+						p->GetTPOIs()->GetPhase(i), p->GetTPOIs()->GetMask(i));
 
-			//one TPOI prior to the pulse in case of intial delay phase == -2.0 -> ReInit CVode
-			if (d>TIME_ERR_TOL)
-				m_tpoi + TPOI::set(d-TIME_ERR_TOL/2, -2.0, 0);
+				//one TPOI prior to the pulse in case of intial delay phase == -2.0 -> ReInit CVode
+				if (d>TIME_ERR_TOL)
+					m_tpoi + TPOI::set(d-TIME_ERR_TOL/2, -2.0, 0);
 
+			}
 		}
 
 	}
@@ -216,13 +224,13 @@ void AtomicSequence::CollectSeqData(NDData<double>& seqdata, double& t, long& of
 	CollectTPOIs();
 
 	for (int i=0; i < GetNumOfTPOIs(); ++i) {
-		//cout << GetName() << " " << t << " " << m_tpoi.GetTime(i)+t << endl;
 		seqdata(0,offset+i+1) = m_tpoi.GetTime(i) + t;
 		seqdata(1,offset+i+1) = m_tpoi.GetPhase(i);
 		GetValue(&seqdata(2,offset+i+1), m_tpoi.GetTime(i));
+		//cout << GetName() << " " << setw(9) << setfill(' ') << m_tpoi.GetTime(i)+t << setw(9) << setfill(' ') << " " << seqdata(5,offset+i+1) << endl;
 		if (pW->pStaticAtom != NULL) pW->pStaticAtom->GetValue( &seqdata(2,offset+i+1), m_tpoi.GetTime(i) + t );
         GetValueLingeringEddyCurrents(&seqdata(2,offset+i+1), m_tpoi.GetTime(i));
-		seqdata(7,offset+i+1) = m_tpoi.GetMask(i);
+		seqdata(MAX_SEQ_VAL+1+2,offset+i+1) = m_tpoi.GetMask(i);
 	}
 
     this->UpdateEddyCurrents();
@@ -234,6 +242,31 @@ void AtomicSequence::CollectSeqData(NDData<double>& seqdata, double& t, long& of
 
 }
 
+/***********************************************************/
+void AtomicSequence::CollectSeqData(OutputSequenceData *seqdata) {
+
+	vector<Module*> children = GetChildren();
+	Pulse* p;
+	double d;
+
+	vector<Event*> events;
+
+	for (size_t j = 0; j < children.size(); ++j) {
+
+		p = ((Pulse*)children[j]);
+		d = p->GetInitialDelay();
+		if (p->GetHardwareMode()>=0)
+			p->GenerateEvents(events);
+
+	}
+	seqdata->AddEvents(events, GetDuration());
+	if (m_alpha!=0 || m_theta!=0 || m_phi!=0)
+		seqdata->SetRotationMatrix(m_alpha,m_theta,m_phi);
+
+	for(int i = 0; i < events.size(); ++i)
+	   delete events[i];
+
+}
 
 /***********************************************************/
 long  AtomicSequence::GetNumOfADCs () {
@@ -265,14 +298,15 @@ void    AtomicSequence::GetValueLingeringEddyCurrents (double * dAllVal, double 
     	    continue;
     	}
 
-		double d[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+		double d[MAX_SEQ_VAL+3] = {0.0};	/* Extra two values (time, rx phase) */
+
 		iter->first->GetValue(d,    iter->first->GetParentDuration()
 										+ iter->first->GetLingerTime()
 										- iter->second
 										+ time );
 
-		iter->first->GetParentAtom()->Rotation(&d[2]);
-		for (int i=2;i<5;++i) dAllVal[i] += d[i];
+		iter->first->GetParentAtom()->Rotation(&d[GRAD_X]);
+		for (int i=GRAD_X;i<=MAX_SEQ_VAL;++i) dAllVal[i] += d[i];
 	}
 
 
@@ -346,5 +380,3 @@ void AtomicSequence::PrepareEddyCurrents() {
 	}
 
 }
-
-

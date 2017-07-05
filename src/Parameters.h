@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ public:
     /**
      * @brief Default destructor
      */
-    ~Parameters() { _instance = 0; };
+    ~Parameters() { m_instance = 0; };
 
     /**
      * @brief Get the single instance of the World parameters
@@ -78,7 +78,7 @@ public:
     void SetDefaults();
 
 
-    static Parameters* _instance;
+    static Parameters* m_instance;
 
     // Sequence parameters
     double m_te;             /**< @brief Sequence TE */
@@ -109,6 +109,7 @@ public:
     //Scanner hardware parameters
     double m_grad_slew_rate; /**< @brief Overall maximum gradient slewrate */
     double m_grad_max_ampl;  /**< @brief Overall maximum gradient amplitude */
+    double m_grad_rise_time; /**< @brief Constant rise time for all trapezoids */
 
 
  private:

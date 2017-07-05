@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 #include "GradPulse.h"
 #include "AtomicSequence.h"
 #include "EddyPulse.h"
-
+#include <limits>
 
 GradPulse::GradPulse  () {
 
@@ -40,6 +40,8 @@ GradPulse::GradPulse  () {
 	m_nlg_py	= 0.0;
 	m_nlg_pz	= 0.0;
 	m_nlg_val	= 0.0;
+	m_rise_time	= 0.0;
+	m_slew_rate = 0.0;
 
 	//SetExceptionalAttrib("NLG_field");
 
@@ -49,6 +51,7 @@ GradPulse::GradPulse  () {
 	{
 		m_slew_rate = *((double*) P->GetAttribute("GradSlewRate")->GetAddress());
 		m_max_ampl  = *((double*) P->GetAttribute("GradMaxAmpl")->GetAddress());
+		m_rise_time = *((double*) P->GetAttribute("GradRiseTime")->GetAddress());
 	}
 
 	m_eddy_pulse	= NULL;
@@ -76,22 +79,18 @@ bool GradPulse::PrepareNLGfield  (PrepareMode mode) {
 		//attributes for the current spin positions, and the gradient value
 		HIDDEN_ATTRIBUTE("NLG_posX", m_nlg_px  );
 		Observe(GetAttribute("NLG_field"),GetName(),"NLG_posX", mode == PREP_VERBOSE);
-		stringstream sX; sX << "a" << m_obs_attribs.size();
-		ReplaceString(val,"X",sX.str());
+		ReplaceSymbolString(val,"X",GetName()+"_NLG_posX");
 		HIDDEN_ATTRIBUTE("NLG_posY", m_nlg_py  );
 		Observe(GetAttribute("NLG_field"),GetName(),"NLG_posY", mode == PREP_VERBOSE);
-		stringstream sY; sY << "a" << m_obs_attribs.size();
-		ReplaceString(val,"Y",sY.str());
+		ReplaceSymbolString(val,"Y",GetName()+"_NLG_posY");
 		HIDDEN_ATTRIBUTE("NLG_posZ", m_nlg_pz  );
 		Observe(GetAttribute("NLG_field"),GetName(),"NLG_posZ", mode == PREP_VERBOSE);
-		stringstream sZ; sZ << "a" << m_obs_attribs.size();
-		ReplaceString(val,"Z",sZ.str());
+		ReplaceSymbolString(val,"Z",GetName()+"_NLG_posZ");
 		HIDDEN_ATTRIBUTE("NLG_value",m_nlg_val );
 		Observe(GetAttribute("NLG_field"),GetName(),"NLG_value", mode == PREP_VERBOSE);
-		stringstream sG; sG << "a" << m_obs_attribs.size();
-		ReplaceString(val,"G",sG.str());
+		ReplaceSymbolString(val,"G",GetName()+"_NLG_value");
 		//set the GiNaC expression and mark this gradient as nonlinear
-		m_non_lin_grad = GetAttribute("NLG_field")->SetMember(val, m_obs_attribs, mode == PREP_VERBOSE);
+		m_non_lin_grad = GetAttribute("NLG_field")->SetMember(val, m_obs_attribs, m_obs_attrib_keyword, mode == PREP_VERBOSE);
 		//mark the parent AtomicSequence of this gradient as nonlinear
 		if (GetParent() != NULL ) ((AtomicSequence*) GetParent())->SetNonLinGrad(m_non_lin_grad);
 	}
@@ -123,10 +122,9 @@ bool     GradPulse::PrepareEddyCurrents  (PrepareMode mode, int steps) {
 		HIDDEN_ATTRIBUTE("EddyTime", m_eddy_time  );
 		Observe(GetAttribute("EddyCurrents"),GetName(),"EddyTime", mode == PREP_VERBOSE);
 		// -> nonsense!! Observe(GetAttribute("EddyCurrents"),GetName(),"Area", mode == PREP_VERBOSE);
-		stringstream sEC; sEC << "a" << m_obs_attribs.size();
-		ReplaceString(val,"T",sEC.str());
+		ReplaceSymbolString(val,"T",GetName()+"_EddyTime");
 		//set the GiNaC expression and mark this gradient as nonlinear
-		m_eddy_currents = GetAttribute("EddyCurrents")->SetMember(val, m_obs_attribs, mode == PREP_VERBOSE);
+		m_eddy_currents = GetAttribute("EddyCurrents")->SetMember(val, m_obs_attribs, m_obs_attrib_keyword, mode == PREP_VERBOSE);
 	}
 
 
@@ -161,9 +159,10 @@ bool     GradPulse::PrepareEddyCurrents  (PrepareMode mode, int steps) {
 /***********************************************************/
 bool GradPulse::Prepare  (PrepareMode mode) {
 
-	bool btag = (m_axis == AXIS_GX || m_axis == AXIS_GY ||  m_axis == AXIS_GZ) ;
-        if (!btag && mode == PREP_VERBOSE)
-		cout << GetName() << ": error in GradPulse::Prepare(). Wrong Axis for this gradient pulse." << endl;
+	bool btag = (m_axis >= AXIS_GX && m_axis <= AXIS_GZ);
+
+  if (!btag && mode == PREP_VERBOSE)
+		cout << GetName() << ": error in GradPulse::Prepare(). Wrong Axis for this gradient pulse:" << m_axis << endl;
 
 	ATTRIBUTE("SlewRate"       , m_slew_rate);
 	ATTRIBUTE("MaxAmpl"        , m_max_ampl);
@@ -206,6 +205,42 @@ void GradPulse::GetValue (double * dAllVal, double const time) {
 
 	dAllVal[1+m_axis] += GetGradient(time);
 	return;
+}
+
+/*****************************************************************/
+inline void GradPulse::GenerateEvents(std::vector<Event*> &events) {
+	GradEvent *grad = new GradEvent();
+	double max_amplitude = std::numeric_limits<double>::min();
+	int num_samples = round(GetDuration()/10.0e-3);
+	for (int i=0; i<num_samples; i++)
+	{
+		double amp = GetGradient((i+1)*10.0e-3);
+
+		if (amp>max_amplitude)
+			max_amplitude=amp;
+
+		grad->m_samples.push_back(amp);
+	}
+	transform( grad->m_samples.begin(), grad->m_samples.end(), grad->m_samples.begin(), bind2nd( divides<double>(), max_amplitude ) );
+
+	grad->m_amplitude = max_amplitude;
+	grad->m_channel = (int)(m_axis-AXIS_GX);
+
+	events.push_back(grad);
+
+	// Add ADCs (if any)
+	int N = GetNADC();
+	if (N>0) {
+		ADCEvent *adc = new ADCEvent();
+		adc->m_num_samples = N;
+		adc->m_dwell_time = 1e6*GetDuration()/N;
+		adc->m_delay = 0;
+
+		adc->m_phase_offset = 0;
+		adc->m_freq_offset = 0;
+
+		events.push_back(adc);
+	}
 }
 
 /***********************************************************/

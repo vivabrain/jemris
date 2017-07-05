@@ -7,9 +7,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -52,17 +52,14 @@ bool AnalyticCoil::Prepare (const PrepareMode mode) {
         /* set the analytic formula for sensitivty evaluation */
         HIDDEN_ATTRIBUTE("posX", m_px  );
         Observe(psens,GetName(),"posX", mode == PREP_VERBOSE);
-        stringstream sX; sX << "a" << m_obs_attribs.size();
-        ReplaceString(val,"X",sX.str());
+        ReplaceSymbolString(val,"X",GetName()+"_posX");
         HIDDEN_ATTRIBUTE("posY", m_py  );
         Observe(psens,GetName(),"posY", mode == PREP_VERBOSE);
-        stringstream sY; sY << "a" << m_obs_attribs.size();
-        ReplaceString(val,"Y",sY.str());
+        ReplaceSymbolString(val,"Y",GetName()+"_posY");
         HIDDEN_ATTRIBUTE("posZ", m_pz  );
         Observe(psens,GetName(),"posZ", mode == PREP_VERBOSE);
-        stringstream sZ; sZ << "a" << m_obs_attribs.size();
-        ReplaceString(val,"Z",sZ.str());
-        m_analytic=psens->SetMember(val, m_obs_attribs, mode == PREP_VERBOSE);
+        ReplaceSymbolString(val,"Z",GetName()+"_posZ");
+        m_analytic=psens->SetMember(val, m_obs_attribs, m_obs_attrib_keyword, mode == PREP_VERBOSE);
     }
 
 	//test GiNaC evaluation: calculate the sensitivities on a grid

@@ -6,9 +6,9 @@ function writeXMLseq(handles,S,dnode,docNode)
 
 %
 %  JEMRIS Copyright (C) 
-%                        2006-2014  Tony Stoecker
-%                        2007-2014  Kaveh Vahedipour
-%                        2009-2014  Daniel Pflugfelder
+%                        2006-2015  Tony Stoecker
+%                        2007-2015  Kaveh Vahedipour
+%                        2009-2015  Daniel Pflugfelder
 %                                  
 %
 %  This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@ global MODULE_TYPE_COUNTER;
 
 % Create DOM root node
 if nargin==3
- MODULE_TYPE_COUNTER=[0 0 0 0];
+ MODULE_TYPE_COUNTER=[0 0 0 0 0];
  [p,n,x]=fileparts(dnode);
  if isempty(p),p=pwd;end
  xmlFileName = [p,'/',n,'.xml'];

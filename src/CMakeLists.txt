@@ -7,12 +7,13 @@ list (APPEND CORE_SRC AnalyticCoil.cpp AnalyticCoil.h
   Bloch_McConnell_CV_Model.h Bloch_CV_Model.cpp Bloch_CV_Model.h
   Coil.cpp Coil.h CoilArray.cpp CoilArray.h CoilPrototypeFactory.cpp
   CoilPrototypeFactory.h ConcatSequence.cpp ConcatSequence.h
-  ConstantGradPulse.cpp ConstantGradPulse.h DOMTreeErrorReporter.cpp
+  ConstantGradPulse.cpp ConstantGradPulse.h Container.cpp Container.h 
+  ContainerSequence.cpp ContainerSequence.h DOMTreeErrorReporter.cpp
   DOMTreeErrorReporter.h Debug.h Declarations.h DelayAtomicSequence.cpp
   DelayAtomicSequence.h DynamicVariables.cpp DynamicVariables.h
   EddyPulse.cpp EddyPulse.h EmptyPulse.cpp EmptyPulse.h ExternalCoil.cpp
   ExternalCoil.h ExternalGradPulse.cpp ExternalGradPulse.h
-  ExternalRFPulse.cpp ExternalRFPulse.h ExternalPulseData GaussianRFPulse.cpp
+  ExternalRFPulse.cpp ExternalRFPulse.h ExternalPulseData Event.h GaussianRFPulse.cpp
   GaussianRFPulse.h GradPulse.cpp GradPulse.h HardRFPulse.cpp
   HardRFPulse.h HDF5IO.cpp HDF5IO.h IdealCoil.cpp IdealCoil.h KSpace.h
   Microstructure.cpp Microstructure.h MicrostructureBoxes.cpp
@@ -21,7 +22,8 @@ list (APPEND CORE_SRC AnalyticCoil.cpp AnalyticCoil.h
   MicrostructureKissingFiber.h MicrostructureSingleFiber.cpp
   MicrostructureSingleFiber.h Module.cpp Module.h
   ModulePrototypeFactory.cpp ModulePrototypeFactory.h NDData.h
-  Parameters.cpp Parameters.h Prototype.cpp Prototype.h
+  OutputSequenceData.h OutputSequenceData.cpp Parameters.cpp Parameters.h 
+  Prototype.cpp Prototype.h
   PrototypeFactory.cpp PrototypeFactory.h Pulse.cpp Pulse.h RFPulse.cpp
   RFPulse.h RepIter.cpp RepIter.h MultiPoolSample.cpp MultiPoolSample.h
   Sample.cpp Sample.h SampleReorderShuffle.cpp SampleReorderShuffle.h
@@ -38,28 +40,29 @@ list (APPEND CORE_SRC AnalyticCoil.cpp AnalyticCoil.h
   World.cpp World.h XMLIO.cpp XMLIO.h config.h ginac_functions.h list.h
   list_c.h rng.cpp rng.h) 
 
-include_directories (${PROJECT_SOURCE_DIR}/src/core
-  ${PROJECT_SOURCE_DIR}/src/matrix/io) 
+# Those directories do not exist, right?
+#include_directories (${PROJECT_SOURCE_DIR}/src/core
+#  ${PROJECT_SOURCE_DIR}/src/matrix/io) 
 
 if (LINUX)
   list (APPEND COMMON_LIBS dl)
 endif()
 
-list (APPEND COMMON_LIBS hdf5 hdf5_cpp xerces-c ${GINAC_LIBRARIES} 
-  ${SUNDIALS_LIBRARIES} cln sundials_cvode sundials_nvecserial)
+list (APPEND COMMON_LIBS ${HDF5_CXX_LIBRARIES} ${Xerces_LIBRARY} ${GINAC_LIBRARIES} ${SUNDIALS_LIBRARIES})
 
 add_library (core ${CORE_SRC})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  target_link_libraries (core ${COMMON_LIBS})
+  target_link_libraries (core ${COMMON_LIBS} )
 endif()
 add_executable (jemris Model.h Model.cpp jemris.cpp)
-target_link_libraries (jemris core ${COMMON_LIBS}) 
+target_link_libraries (jemris ${COMMON_LIBS} core) 
+
+# Install the binary to bin
 install (TARGETS jemris DESTINATION "bin")
 
-
 add_executable (sanityck Model.h Model.cpp sanityck.cpp)
-target_link_libraries (sanityck core ${COMMON_LIBS}) 
+target_link_libraries (sanityck ${COMMON_LIBS} core) 
 
 if (MPI_C_FOUND)
   add_executable (pjemris Mpi2Evolution.h
@@ -81,6 +84,9 @@ if (MPI_C_FOUND)
   install (TARGETS pjemris DESTINATION "bin")
 endif()
 
+# Install the examples and matlab GUIs
+install (TARGETS jemris DESTINATION "bin")
+
 add_test (
   NAME sequences
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/share/examples
@@ -93,6 +99,10 @@ add_test (
   NAME coils 
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/share/examples
   COMMAND sanityck . 3)
+add_test (
+  NAME pulseq_output 
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/share/examples
+  COMMAND sanityck . 4)
 
 if (MPI_FOUND)
    add_test(

@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C)
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -141,10 +141,11 @@ bool  EddyPulse::Insert (PrepareMode mode) {
 	if (m_prepared || mode==PREP_UPDATE) return true;
 
 	//insert DOM-node in parent
-	DOMElement* node = SequenceTree::instance()->GetDOMDocument()->createElement(StrX("EDDYCURRENT").XMLchar());
+	DOMElement* node = m_parent->GetSeqTree()->GetDOMDocument()->createElement(StrX("EDDYCURRENT").XMLchar());
 	if (node==NULL) return false;
 	m_parent->GetNode()->appendChild (node);
-	SequenceTree::instance()->GetModuleMap()->insert(pair<DOMNode*, Module*> (node, this));
+	m_parent->GetSeqTree()->GetModuleMap()->insert(pair<DOMNode*, Module*> (node, this));
+	SetSeqTree(m_parent->GetSeqTree());
 	Initialize(node);
 	m_prepared = true;
 	return true;

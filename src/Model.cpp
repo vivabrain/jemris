@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -136,6 +136,12 @@ void Model::RunSequenceTree (double& dTimeShift, long& lIndexShift, Module* modu
 
 	}
 	
+	//call Calculate for a Container
+	if (module-> GetType() == MOD_CONTAINER)	{
+		ContainerSequence* pCS = ((Container*) module)->GetContainerSequence();
+		RunSequenceTree(dTimeShift, lIndexShift, pCS);
+	}
+
 	//call Calculate for each TPOI in Atom
 	if (module-> GetType() == MOD_ATOM)	{
 		

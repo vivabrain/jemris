@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -112,7 +112,12 @@ class GradPulse : public Pulse {
      */
     bool          HasNonLinGrad(){return m_non_lin_grad; };
 
- protected:
+    /**
+     * @see Pulse::GenerateEvents()
+     */
+    virtual void GenerateEvents(std::vector<Event*> &events);
+
+  protected:
     /**
      * Get informations on this Gradient
      *
@@ -122,6 +127,7 @@ class GradPulse : public Pulse {
 
    double m_slew_rate;       /**< @brief The slewrate of this gradient pulse */
    double m_max_ampl;        /**< @brief The maximum amplitude of this gradient pulse */
+   double m_rise_time;       /**< @brief The constant rise time of this gradient pulse */
    double m_area;            /**< @brief The area of the gradient pulse*/
 
    bool   m_non_lin_grad;    /**< @brief A flag for nonlinear gradients */

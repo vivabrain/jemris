@@ -3,9 +3,9 @@ function varargout = JEMRIS_txrx(varargin)
 
 %
 %  JEMRIS Copyright (C) 
-%                        2006-2014  Tony Stoecker
-%                        2007-2014  Kaveh Vahedipour
-%                        2009-2014  Daniel Pflugfelder
+%                        2006-2015  Tony Stoecker
+%                        2007-2015  Kaveh Vahedipour
+%                        2009-2015  Daniel Pflugfelder
 %                                  
 %
 %  This program is free software; you can redistribute it and/or modify
@@ -59,9 +59,9 @@ handles.win=(strcmp(computer,'PCWIN') || strcmp(computer,'PCWIN64'));
 handles.CWD=pwd;
 if (handles.win)
     if (strcmp(computer,'PCWIN64'))
-        handles.JemrisPath=['"',winqueryreg('HKEY_LOCAL_MACHINE', 'SOFTWARE\Wow6432Node\Research Centre Juelich\jemris', 'Path')];
+        handles.JemrisPath=['"',winqueryreg('HKEY_LOCAL_MACHINE', 'SOFTWARE\Wow6432Node\jemris', 'Path')];
     else
-        handles.JemrisPath=['"',winqueryreg('HKEY_LOCAL_MACHINE', 'SOFTWARE\Research Centre Juelich\jemris', 'Path')];
+        handles.JemrisPath=['"',winqueryreg('HKEY_LOCAL_MACHINE', 'SOFTWARE\jemris', 'Path')];
     end
     handles.JemrisShare=[''];
     handles.JemrisCall=[fullfile(handles.JemrisPath,'jemris.exe"')];

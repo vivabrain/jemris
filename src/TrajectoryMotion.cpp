@@ -8,9 +8,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -98,7 +98,7 @@ void TrajectoryMotion::LoadFile(string filename) {
     }
 
     // data up to the end of trajectory?
-	SequenceTree* pSeqTree = SequenceTree::instance();
+	SequenceTree* pSeqTree = World::instance()->pSeqTree;
 	double seqDuration = pSeqTree->GetRootConcatSequence()->GetDuration();
     if (m_time.back() < seqDuration) {
     	m_time.push_back(seqDuration + 1);

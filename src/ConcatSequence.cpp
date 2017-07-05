@@ -3,11 +3,11 @@
  */
 
 /*
- *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
- *                                  
+ *  JEMRIS Copyright (C)
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
+ *
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,6 +72,9 @@ inline double ConcatSequence::GetDuration () {
 		for (unsigned int j=0; j<children.size() ; ++j)
 			duration += children[j]->GetDuration();
 
+	if (GetHardwareMode()>0)
+		duration = 0;
+
 	m_duration = duration;
 	DEBUG_PRINT("  ConcatSequence::GetDuration() of " << GetName() << " calculates  duration = " << duration << endl;)
 
@@ -117,6 +120,20 @@ void  ConcatSequence::GetValue (double * dAllVal, double const time) {
 }
 
 /***********************************************************/
+long  ConcatSequence::GetNumOfADCs () {
+
+	long lADC = 0;
+	vector<Module*> children = GetChildren();
+
+	for (RepIter r=begin(); r<end(); ++r)
+		for (size_t j=0; j<children.size() ; ++j)
+			lADC += ((Sequence*) children[j])->GetNumOfADCs();
+
+	return lADC;
+
+}
+
+/***********************************************************/
 string          ConcatSequence::GetInfo() {
 	stringstream s;
 	s << " Repetitions = " << m_repetitions;
@@ -130,9 +147,24 @@ void ConcatSequence::CollectSeqData(NDData<double>& seqdata, double& t, long& of
 
 	for (RepIter r=begin(); r<end(); ++r)
 		for (unsigned int j=0; j<children.size() ; ++j) {
-			((Sequence*) children[j])->GetDuration(); // triggers duration notification
-			((Sequence*) children[j])->CollectSeqData(seqdata, t, offset);
+			if (children[j]->GetHardwareMode()<=0) {
+				((Sequence*) children[j])->GetDuration(); // triggers duration notification
+				((Sequence*) children[j])->CollectSeqData(seqdata, t, offset);
+			}
 		}
 
 }
 
+/***********************************************************/
+void ConcatSequence::CollectSeqData(OutputSequenceData *seqdata) {
+
+	vector<Module*> children = GetChildren();
+
+	for (RepIter r=begin(); r<end(); ++r)
+		for (unsigned int j=0; j<children.size() ; ++j) {
+			if (children[j]->GetHardwareMode()>=0) {
+				((Sequence*) children[j])->GetDuration(); // triggers duration notification
+				((Sequence*) children[j])->CollectSeqData(seqdata);
+			}
+		}
+}

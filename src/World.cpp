@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@
 
 #include "World.h"
 #include "Model.h"
+#include "SequenceTree.h"
 
 World* World::m_instance = 0;
 
@@ -35,7 +36,6 @@ World* World::instance() {
     if (m_instance == 0) {
 
         m_instance = new World();
-
 
         m_instance->time                =  0.0;
         m_instance->total_time          =  0.0;
@@ -51,6 +51,7 @@ World* World::instance() {
         m_instance->solverSuccess       = true;
         m_instance->m_noofspinprops     = 9;
 
+        m_instance->pSeqTree            = NULL;
         m_instance->pAtom               = NULL;
         m_instance->pStaticAtom         = NULL;
 
@@ -77,6 +78,7 @@ double World::ConcomitantField (double* G) {
 
 }
 
+/***********************************************************/
 void World::SetNoOfSpinProps (int n) { 
 
 	// valid also for multi pool sample

@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -46,8 +46,8 @@
 XERCES_CPP_NAMESPACE_USE
 
 
-enum PrepareMode{	PREP_INIT,	PREP_VERBOSE,	PREP_UPDATE					};
-enum Type		{	MOD_PULSE,		MOD_ATOM,	MOD_CONCAT,	MOD_VOID,	COIL};
+enum PrepareMode{ PREP_INIT,	PREP_VERBOSE,	PREP_UPDATE };
+enum Type	{ MOD_PULSE,	MOD_ATOM,	MOD_CONCAT, MOD_CONTAINER, MOD_VOID, COIL};
 
 //parameter class declaration
 class Parameters;
@@ -82,9 +82,14 @@ class Prototype {
     /**
      * @brief Default destructor.
      *
-     * Default destrcutor
+     * Delete my attributes
      */
-    virtual ~Prototype () {};
+    virtual ~Prototype () {
+       map<string,Attribute*>::iterator	iter;
+       	for (iter = m_attributes.begin(); iter != m_attributes.end(); iter++ )
+		delete iter->second;
+
+    };
 
     /**
      * @brief Default copy constructor.
@@ -163,6 +168,12 @@ class Prototype {
      * @return          True, if replacing took place at least once (s1 was in str).
      */
     static bool ReplaceString (string& str, const string& s1, const string& s2);
+
+
+    /**
+     * @brief A global sub-string replacer which replaces only complete symbol strings
+     */
+    static bool ReplaceSymbolString (string& str, const string& s1, const string& s2);
 
     /**
      * @brief A global string tokenizer.
@@ -272,6 +283,7 @@ class Prototype {
      * @return success/failure of operation
      */
     bool Observe (Attribute* attrib, string prot_name, string attrib_name, bool verbose);
+    bool Observe (Attribute* attrib, string prot_name, string attrib_name, string attrib_keyword, bool verbose);
 
     /**
      * @brief Notify all observers of an attribute.
@@ -322,6 +334,7 @@ class Prototype {
     vector<double>              m_vector;      /**< @brief A vector which elements are accessible through loop counters.*/
     map<string,Attribute*>		m_attributes;  /**< @brief Map to connect a keyword with an Attribute*/
     vector<Attribute*>			m_obs_attribs; /**< @brief Vector of observed Attributes */
+    vector<string>				m_obs_attrib_keyword; /**< @brief Vector of user-defined Attribute names */
 
 };
 

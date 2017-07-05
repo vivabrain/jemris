@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -70,6 +70,24 @@ inline void  EmptyPulse::SetTPOIs () {
 	  }
 	}
 
+}
+
+/*****************************************************************/
+inline void EmptyPulse::GenerateEvents(std::vector<Event*> &events) {
+
+	// Add ADCs (if any)
+	int N = GetNADC();
+	if (N>0) {
+		ADCEvent *adc = new ADCEvent();
+		adc->m_num_samples = N;
+		adc->m_dwell_time = GetDuration()/N*1e6;
+		adc->m_delay = GetInitialDelay()*1e3;
+
+		adc->m_phase_offset = 0;
+		adc->m_freq_offset = 0;
+
+		events.push_back(adc);
+	}
 }
 
 /***********************************************************/

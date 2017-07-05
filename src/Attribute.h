@@ -7,9 +7,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -215,6 +215,13 @@ class Attribute {
     std::string	GetSymbol() { return m_symbol_name; };
 
     /**
+     * @brief Get the GiNaC formula of this attribute.
+     *
+     * return the GiNaC formula
+     */
+    std::string	GetFormula() { return m_formula; };
+
+    /**
      * @brief Set the Prototype's private member represented by this attribute.
      * The function performs the following tasks:
      * - write a value to the Prototype's private member, in case of non-dynamic expressions
@@ -227,7 +234,7 @@ class Attribute {
      * @param verbose		if true, warnings will be dumped to stdout
      * @return				success/failure of operation
      */
-    bool SetMember (std::string expr, const std::vector<Attribute*>& obs_attribs, bool verbose = false);
+    bool SetMember (std::string expr, const std::vector<Attribute*>& obs_attribs, const std::vector<std::string>& obs_attrib_keyword, bool verbose = false);
 
     /**
      * @brief Evaluate the GiNaC expression of this attribute
@@ -428,14 +435,14 @@ class Attribute {
 	bool       		m_public;		/**< @brief Indicating whether the attribute is accessible through XML. */
 	bool       		m_observable;	/**< @brief Indicating whether the attribute is observable. */
 	bool       		m_dynamic;		/**< @brief Indicating whether the attribute dynamically changes its value in runtime. */
-	std::string     		m_name;			/**< @brief Name of the attribute (in XML).*/
+	std::string     m_name;			/**< @brief Name of the attribute (in XML).*/
 	void*      		m_address;		/**< @brief Pointer to the Prototype member variable, which is represented by this attribute.  */
-	std::string     		m_datatype;		/**< @brief Type of the Prototype member variable, which is represented by this attribute.  */
+	std::string     m_datatype;		/**< @brief Type of the Prototype member variable, which is represented by this attribute.  */
 	void*      		m_backup;		/**< @brief Backup value of the Prototype member variable, which is represented by this attribute.  */
     Prototype*		m_prototype;	/**< @brief Pointer to the Prototype object, which instantiated this attribute.  */
-    std::string			m_symbol_name;	/**< @brief GiNaC symbol name of the attribute.*/
-    std::string			m_sym_diff;		/**< @brief GiNaC symbol name for symbolic derivative.*/
-	std::string     		m_formula;		/**< @brief Mathematical formula of the attribute (in XML) for GiNaC evaluation.*/
+    std::string		m_symbol_name;	/**< @brief GiNaC symbol name of the attribute.*/
+    std::string		m_sym_diff;		/**< @brief GiNaC symbol name for symbolic derivative.*/
+	std::string     m_formula;		/**< @brief Mathematical formula of the attribute (in XML) for GiNaC evaluation.*/
 	GiNaC::ex       m_expression;	/**< @brief GiNaC Mathematical expression of the attribute */
 	GiNaC::lst		m_symlist;		/**< @brief GiNaC list of all symbols involved in the calculation.*/
 	bool			m_ginac_excomp;	/**< @brief True, if GiNaC external compiler is available on this system.*/

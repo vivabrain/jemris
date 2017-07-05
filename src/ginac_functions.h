@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -67,12 +67,12 @@ using namespace GiNaC ;
  */
 const symbol & get_symbol(const string & sym_name)
 {
-    static map<string, symbol> symbol_list;
-    map<string, symbol>::iterator it = symbol_list.find(sym_name);
+    static map<string, realsymbol> symbol_list;
+    map<string, realsymbol>::iterator it = symbol_list.find(sym_name);
     if (it != symbol_list.end())
         return it->second;
     else
-        return symbol_list.insert(pair<string, symbol>(sym_name, symbol(sym_name))).first->second;
+        return symbol_list.insert(pair<string, realsymbol>(sym_name, realsymbol(sym_name))).first->second;
 }
 
 

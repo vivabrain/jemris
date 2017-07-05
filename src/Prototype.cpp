@@ -4,9 +4,9 @@
 
 /*
  *  JEMRIS Copyright (C) 
- *                        2006-2014  Tony Stoecker
- *                        2007-2014  Kaveh Vahedipour
- *                        2009-2014  Daniel Pflugfelder
+ *                        2006-2015  Tony Stoecker
+ *                        2007-2015  Kaveh Vahedipour
+ *                        2009-2015  Daniel Pflugfelder
  *                                  
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,40 @@ bool Prototype::ReplaceString(string& str, const string& s1, const string& s2) {
 
         loc = str.find( s1 , loc );
 		if (loc == string::npos ) break;
-		str.replace(str.find(s1,loc),s1.size(),s2) ;
+		str.replace(loc,s1.size(),s2) ;
+		loc += s2.size();
+		ret = true;
+
+	}
+
+	return ret;
+
+}
+
+/***********************************************************/
+bool Prototype::ReplaceSymbolString(string& str, const string& s1, const string& s2) {
+
+	bool ret = false;
+	string::size_type loc = 0;
+	string::size_type len = s1.size();
+	string varchars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_";
+
+	for (;;) {
+        loc = str.find( s1 , loc );
+        //stop if string s1 is not in str
+		if (loc == string::npos ) break;
+		//don't replace if character before s1 belongs to a variable
+		if (loc > 0 && varchars.find(str.at(loc-1),0)!=string::npos ) {
+			loc+=s1.size();
+			continue;
+		}
+		//don't replace if character after s1 belongs to a variable
+		if (loc+len < str.size() && varchars.find(str.at(loc+len),0)!=string::npos ) {
+			loc+=s1.size();
+			continue;
+		}
+		str.replace(loc,s1.size(),s2) ;
+		loc += s2.size();
 		ret = true;
 
 	}
@@ -108,6 +141,11 @@ void           Prototype::HideAttribute (string attrib, bool observable){
 
 /***********************************************************/
 bool Prototype::Observe (Attribute* attrib, string prot_name, string attrib_name, bool verbose){
+ return Observe(attrib,prot_name,attrib_name,prot_name+"_"+attrib_name,verbose);
+}
+
+/***********************************************************/
+bool Prototype::Observe (Attribute* attrib, string prot_name, string attrib_name, string attrib_keyword, bool verbose){
 
 	Prototype* M = GetPrototypeByAttributeValue("Name",prot_name);
 	if (M==NULL ) {
@@ -124,8 +162,10 @@ bool Prototype::Observe (Attribute* attrib, string prot_name, string attrib_name
     	for(unsigned int i = 0; i < m_obs_attribs.size(); i++)
     	    if ( m_obs_attribs.at(i) == a ) m_obs_attribs.erase(m_obs_attribs.begin()+i);
 		m_obs_attribs.push_back(a);
-
-		if ( attrib !=NULL && attrib->IsObservable()  ) attrib->AttachSubject(a);
+		for(unsigned int i = 0; i < m_obs_attrib_keyword.size(); i++)
+			if ( m_obs_attrib_keyword.at(i) == attrib_keyword ) m_obs_attrib_keyword.erase(m_obs_attrib_keyword.begin()+i);
+		m_obs_attrib_keyword.push_back(attrib_keyword);
+		if ( attrib !=NULL && attrib->IsObservable()  ) { attrib->AttachSubject(a);	}
 	}
 	else {
 		if (verbose)
@@ -179,18 +219,46 @@ bool Prototype::Prepare  (PrepareMode mode){
 			//set the modules for observation
 			if (keyword == "Observe") {
 
+				string obsattriblist=val;
+				ReplaceString(obsattriblist," ","");
+
+				//backward compatibility
+				// support old XML syntax (JEMRIS version <= 2.8.0)
+				// Observe="Module1,Attribute1/Module2,Attribute2/..."
+				vector<string> vhelp = Tokenize(val,".");
+				if (vhelp.size() == 1) {
+					vector<string> vpold = Tokenize(val,"/");
+					for (unsigned int i=0;i<vpold.size();i++) {
+						vector<string> vsold = Tokenize(vpold[i],",");
+						if (vsold.size() == 2 && i==0 ) obsattriblist="";
+						stringstream attribkey; attribkey << "a" << i+1;
+						obsattriblist += (attribkey.str()+"="+vsold[0]+"."+vsold[1]);
+						if (i+1<vpold.size()) obsattriblist += ",";
+					}
+				}
+
+				// new XML syntax (JEMRIS version >= 2.8.1)
+				// Observe="Module1.Attribute1=Keyword1,Module2.Attribute2=Keyword2,..."
 				m_obs_attribs.clear();
-				vector<string> vp = Tokenize(val,"/");
+				m_obs_attrib_keyword.clear();
+				vector<string> vp = Tokenize(obsattriblist,",");
 				for (unsigned int i=0;i<vp.size();i++) {
 
-					vector<string> vs = Tokenize(vp[i],",");
+					vector<string> vs = Tokenize(vp[i],"=");
 					if (vs.size() != 2) {
 						if (mode == PREP_VERBOSE)	cout << GetName() << ": wrong syntax in Observe \n";
 						retval = false;
 						continue;
 					}
 
-					retval = Observe(attribute,vs[0],vs[1],mode == PREP_VERBOSE);
+					vector<string> va = Tokenize(vs[1],".");
+					if (va.size() != 2) {
+						if (mode == PREP_VERBOSE)	cout << GetName() << ": wrong syntax in Observe \n";
+						retval = false;
+						continue;
+					}
+
+					retval = Observe(attribute,va[0],va[1],vs[0],mode == PREP_VERBOSE);
 					continue;
 				}
 				continue; //proceed with next attribute
@@ -198,7 +266,7 @@ bool Prototype::Prepare  (PrepareMode mode){
 			}
 
 			//standard case: set my private member via the Attribute (possibly GiNaC evaluation)
-			if ( attribute->IsObservable()  ) retval = attribute->SetMember(val, m_obs_attribs, mode == PREP_VERBOSE);
+			if ( attribute->IsObservable()  ) retval = attribute->SetMember(val, m_obs_attribs, m_obs_attrib_keyword, mode == PREP_VERBOSE);
 
 
 		}
