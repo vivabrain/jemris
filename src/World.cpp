@@ -37,6 +37,14 @@ World* World::instance() {
 
         m_instance = new World();
 
+	//MODIF
+        fstream logAct("logActivation.txt",ios::in);
+        logAct>>m_instance->logFile;
+        logAct>>m_instance->logTrajectories;
+        logAct.close();
+        m_instance->m_trajBegin         =  0;
+        m_instance->m_trajSize          =  1;
+        //MODIF***
         m_instance->time                =  0.0;
         m_instance->total_time          =  0.0;
         m_instance->phase               = -1.0;

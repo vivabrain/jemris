@@ -32,16 +32,23 @@
 
 TrajectoryInterface::TrajectoryInterface() {
 	m_LastHuntIndex=0;
+//MODIF
+	m_currentSpinIndex=0;
+	m_trajLoopDuration=0;
+	m_trajLoopNumber=0;
+	m_spinActive=true;
+//MODIF***
 }
 
 TrajectoryInterface::~TrajectoryInterface() {
 }
 
 void TrajectoryInterface::GetValue(double time, double*value){
-	if (m_time.size()>0)
+	if (m_time.size()>0 || m_time_full.size()>0)    //MODIF
 		GetValueDerived(time,value);
 
 }
+
 
 /***********************************************************/
 

@@ -48,7 +48,13 @@ public:
 	Trajectory(TrajectoryInterface *strategy):m_strategy(strategy) {}
 
 	void GetValue(double time, double *value);
+//MODIF
+	void GetValue(double time, double *value, long currentSpin);
 
+	void FlowLoop(double loopDuration,long loopTrajNumber);
+
+	bool spinActivation(long currentSpin);
+//MODIF***
 	void LoadFile(string filename);
 
 	void SetStrategy(TrajectoryInterface *new_strategy) {m_strategy = new_strategy;};
