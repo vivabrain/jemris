@@ -39,8 +39,15 @@ World* World::instance() {
 
 	//MODIF
         fstream logAct("logActivation.txt",ios::in);
-        logAct>>m_instance->logFile;
-        logAct>>m_instance->logTrajectories;
+        if(logAct.is_open())	{
+		logAct>>m_instance->logFile;
+		logAct>>m_instance->logTrajectories;
+	}
+	else
+	{
+		m_instance->logFile 	    = 0;
+		m_instance->logTrajectories = 0;
+	}
         logAct.close();
         m_instance->m_trajBegin         =  0;
         m_instance->m_trajSize          =  1;
