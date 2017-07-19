@@ -24,7 +24,7 @@ if [ -d "$PTpath/PT" ]; then
   echo "rm -R $PTpath/PT"
   rm -R $PTpath/PT
 fi
-/Applications/paraview.app/Contents/bin/pvbatch ParticleTracer.py
+pvbatch ParticleTracer.py  #If problems, use pvpyhton instead of pvbatch
 
 
 #Convert to JEMRIS
