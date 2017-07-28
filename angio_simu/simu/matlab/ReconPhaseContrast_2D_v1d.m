@@ -8,7 +8,7 @@ addpath './sequences/ReconUtilities/';
 
 
 %PARAMETERS--------------------
-VENC=1000; %mm/s
+VENC=14; %mm/s
 invertVel=+1;   %To invert velocity sign
 
 
@@ -26,7 +26,7 @@ control.isJemris27  = true; %identifying software version
 
 
 
-
+    %Calculate image dimensions
     params.seq        = 'name';
     %Read image size
     t=h5read(strcat([params.path,'/signals.h5']),'/signal/times');
