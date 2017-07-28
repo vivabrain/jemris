@@ -24,7 +24,7 @@ if [ -d "$PTpath/PT" ]; then
   echo "rm -R $PTpath/PT"
   rm -R $PTpath/PT
 fi
-/Applications/paraview.app/Contents/bin/pvpython ParticleTracer.py  #Use pvbatch for parallel
+pvpython ParticleTracer.py  #Use pvbatch for parallel
 
 
 
