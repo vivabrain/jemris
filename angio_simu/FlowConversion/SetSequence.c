@@ -84,7 +84,7 @@ int main (int argc, char *argv[])
 	//if(Nsli%2==1)     Nsli++;
 	//Calculate new FOV
     FOV=Nplane*VoxelSize;
-	FOVthickness=Nsli*(SliceThickness+InterSlice)-InterSlice;
+	FOVthickness=Nsli*(SliceThickness+InterSlice);
 	//Actualise values according to SliceOrientation
 	if(SliceOrientation!="tra" && SliceOrientation!="sag" && SliceOrientation!="cor")   {
         cout << "ERROR: SliceOrientation error "<< endl;

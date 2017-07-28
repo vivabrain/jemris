@@ -114,9 +114,9 @@ int main (int argc, char *argv[]){
         NSourcePoints=k+1;
         DeltaT=k*NodesInterval/Vmax;
 	}
-	if(NSourcePoints<2)    NSourcePoints=0;
+	if(NSourcePoints<2)    { NSourcePoints=0; DeltaT=NodesInterval/Vmax; }
 	cout<<"Time step: "<<DeltaT*1000<<" ms"<<endl;
-    cout<<"Seeding paraboloid height: "<<(NSourcePoints-1)*NodesInterval<<" mm"<<"     <-- WARNING ! Decrease DeltaT if > to vessels diameter"<<endl;
+    cout<<"Seeding paraboloid height: "<<NodesInterval*fabs(NSourcePoints-1.0)<<" mm"<<"     <-- WARNING ! Decrease DeltaT if > to vessels diameter"<<endl;
     //Store flow loop duration in a file (DeltaT if steady, CycleT if unsteady)
     fstream FlowLoop("./particles_loop.dat",ios::out|ios::trunc);
     if(ForceReinjection==0)     FlowLoop<<DeltaT*1000<<" ms"<<endl;
