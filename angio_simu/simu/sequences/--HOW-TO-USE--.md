@@ -1,7 +1,7 @@
 ### Sequences indications ###
 
 # Here are some sequences examples for angiography.
-# With flow, the number of spins rapidly increases for long sequences duration. However, sequences with short TR and spoiling usually require a high density of spins to be realistic. Thus, to reduce computation time, an expedient is to shorten artificially the T2 relaxation time of the spins to 1/4 of the TR (only for sequences based on T1 contrast or phase value).
+# The number of spins flow rapidly increases for long sequences duration. However, sequences with short TR and spoiling usually require a high density of spins to get realistic results. Thus, to reduce computation time, an expedient is to shorten artificially the T2 relaxation time of the spins to 1/4 of the TR (only for sequences based on T1 contrast or phase value).
 
 
 ### 2D sequences ###
