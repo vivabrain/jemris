@@ -42,6 +42,7 @@
 
 
 *PC_3D_tra_3dVxyz:
+- The number of 3D slices is Nz
 - The 3d velocity encoding (mm/s) is the "Aux1" parameter in the "Venc" tag
 - NO SPOILING ! Reduce the T2 to 1/4 of the TR
 - Run the 4 subsequences and store the corresponding signals as "signals0.h5", "signalsX.h5", "signalsY.h5" and "signalsZ.h5"
