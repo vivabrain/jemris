@@ -88,9 +88,6 @@ imagePhase=angle(imageN./imageP);
 imagePhase=VENC*imagePhase/pi*invertVel; %Donne vitesses en mm/s pour division cplexe
 
 imDispl=imagePhase;
-maxScale=max(max(max(imDispl)));
-minScale=min(min(min(imDispl)));
-maxScale(maxScale<=minScale)=minScale+1;
 sub=0;
 figure;
 for i=1:params.nZ
@@ -101,7 +98,7 @@ for i=1:params.nZ
   end;   
   subplot(NdispRows,NdispCols,sub);
   %colormap(gray);
-  imagesc(imDispl(:,:,i),[minScale maxScale]);%,[0 8.5e-7]);%,[-27 -14]);%,[0 20e-7]);
+  imagesc(imDispl(:,:,i),[-VENC VENC]);%,[0 8.5e-7]);%,[-27 -14]);%,[0 20e-7]);
 end;
 set(gcf,'NextPlot','add');
 axes;
