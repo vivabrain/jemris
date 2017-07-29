@@ -26,8 +26,8 @@
 - Image reconstruction with ReconPhaseContrast_2D_v1d.m
 
 
-*PC_2D_tra_3dV:
-- The 1d velocity encoding (mm/s) is the "Aux1" parameter in the "Venc" tag
+*PC_2D_tra_3dVxyz:
+- The 3d velocity encoding (mm/s) is the "Aux1" parameter in the "Venc" tag
 - NO SPOILING ! Reduce the T2 to 1/4 of the TR
 - Image reconstruction with ReconPhaseContrast_2D_v3d.m
 
