@@ -3,7 +3,7 @@ function ReconJemrisCartesianDataMain
 % reconstructs data you just acquired.
 
 clear all
-addpath './sequences/ReconUtilities/';
+addpath './matlab/ReconUtilities/';
 
 
 
