@@ -25,13 +25,13 @@ videoSave=0;
 niftiSave=0;
 MIPdisp=1;
 mask=0; 
-LinesDisp=4;
 allDispl=0;
 rawDispl=0;
 
 
 %PARAMETERS
 slowMovie=4;
+LinesDisp=4;
 NdispRows=LinesDisp;
 NdispCols=LinesDisp;
 NsubPlots=NdispRows*NdispCols;
