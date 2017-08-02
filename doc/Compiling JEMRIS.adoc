@@ -1,0 +1,184 @@
+# Compiling and installing JEMRIS with flow extension
+
+## Requirements
+
+Before compiling JEMRIS, make sure the following libraries are installed :
+
+- CVODE 2.5         http://www.llnl.gov/casc/sundials
+- CLN 1.2.X         http://ginac.de/CLN
+- GiNaC 1.4.X       http://ginac.de
+- Xerces C++ 2.8.0  http://xerces.apache.org/xerces-c
+- VarArray 1.0      http://www.fz-juelich.de/jsc/cv/tools/VarArray  
+
+You may also want to install the boost C++ libraries and HDF5. IMPORTANT: Only use HDF5 1.8 as HDF5 1.10 will not allow compiling JEMRIS.
+
+## Using AngioTK's docker image:
+
+The AngioTK docker image comes with all the dependencies installed, except for GiNaC (Feel++ features a modified GiNaC version). As a consequence, we only need to install GiNaC.
+
+### Before starting docker: cloning the JEMRIS repository:
+
+We need a directory which will be mounted as a volume in docker and will contain the source files as well as all the data we may want to keep after exiting the docker container. Let's call it `shared`:
+
+```
+mkdir -p ~/shared
+mkdir ~/shared/git
+```
+
+Clone the JEMRIS repository and switch to the appropriate `flow_loop` branch:
+
+```
+cd ~/shared/git
+git clone git@github.com:vivabrain/jemris.git
+git checkout flow_loop
+```
+
+To be able to compile JEMRIS while keeping the source directory unaltered, create an other directory and copy all source files inside it:
+
+```
+mkdir ~/shared/jemris_sources
+cp -r ~/shared/git/jemris/* ~/shared/jemris_sources/
+```
+
+### Starting docker
+
+We can now start docker using the appropriate options and mounting the required volumes:
+
+```
+docker run --name=myangiotk --pid=host --ipc=host -it -e DISPLAY=:$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /home/$USER/.Xauthority:/home/feelpp/.Xauthority -v /home/$USER/feel:/feel -v /home/$USER/shared:/home/feelpp/shared feelpp/angiotk:master-ubuntu-16.10
+```
+
+### GiNaC installation
+
+Install GiNaC (pick the development version as we need the header files)
+
+```
+sudo apt-get update
+sudo apt-get install libginac-dev
+```
+
+### Compiling JEMRIS 
+
+Use `configure` to prepare JEMRIS compiling, with the necessary options:
+
+```
+cd ~/shared/jemris_sources
+./configure --prefix=/usr/local/share/JEMRIS_flow2/ \
+				--program-suffix=_flow2  \
+				--enable-boost \
+				--disable-mpi \
+				--with-hdf5 \
+				--enable-silent-rules \
+				--bindir="/usr/local/bin" \
+				CPPFLAGS="-I/usr/local/include -I/usr/include/hdf5/serial" \
+				LDFLAGS="-L/usr/lib/x86_64-linux-gnu/hdf5/serial" \
+				CXXFLAGS="-std=c++11"
+```
+
+WARNING: If you wish to use HDF5, enable it as in the command above using `--with-hdf5`, but make sure to have HDF5 v1.8 and not v1.10. If you encounter errors like `undefined reference to: H5::CommonFG::openGroup(...)` it means you are using HDF5 v1.10 (which introduced a lot of changes in some classes used by JEMRIS).
+
+You could also decide to change some options. For example, you could disable boost by replacing `--enable-boost` by `--disable-boost`.
+
+Then, compile using `make`:
+
+```
+make -j 4
+```
+
+Run tests using `make check`
+
+```
+make check
+```
+
+In its output, pay attention to the following lines, and make sure the three tests were successful.
+
+```
+============================================================================
+Testsuite summary for jemris 2.7.2
+============================================================================
+# TOTAL: 3
+# PASS:  3
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+```
+
+If any test fail, make sure the JEMRIS dependencies are installed and check the previously mentioned `configure` options were typed correctly. In particular, if you chose to disable boost in the `configure` step, 1 test should fail as it needs boost. 
+
+When you are satisfied with the tests results, proceed to install JEMRIS:
+
+```
+sudo make install
+```
+
+### Testing the flow loop extension
+
+#### Installing the feature/flow\_loop\_simulations branch
+
+The installation procedure is the same, except we switch to the `feature/flow_loop_simulations` branch:
+
+```
+cd ~/shared/git/jemris
+git checkout feature/flow_loop_simulations
+cd ~/shared/jemris_sources
+rm -rf *
+cp -r ~/shared/git/jemris/* .
+```
+
+The docker command is also the same:
+
+```
+docker run --name=myangiotk --pid=host --ipc=host -it -e DISPLAY=:$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /home/$USER/.Xauthority:/home/feelpp/.Xauthority -v /home/$USER/feel:/feel -v /home/$USER/shared:/home/feelpp/shared feelpp/angiotk:master-ubuntu-16.10
+```
+
+Don't forget to install GiNaC
+
+```
+sudo apt-get update && sudo apt-get install libginac-dev
+```
+
+Prepare JEMRIS compilation with `configure`:
+
+```
+cd ~/shared/jemris_sources
+./configure --prefix=/usr/local/share/JEMRIS_flow2/ --program-suffix=_flow2 --enable-boost --disable-mpi --with-hdf5 --enable-silent-rules --bindir="/usr/local/bin" CPPFLAGS="-I/usr/local/include -I/usr/include/hdf5/serial" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/hdf5/serial" CXXFLAGS="-std=c++11"
+```
+
+Compile with `make`, run JEMRIS tests with `make check` and install with `sudo make install`:
+
+```
+make -j 4 && make check && sudo make install
+```
+
+#### Flow Tests
+
+Now we can test the flow extension. 
+
+```
+cd ~/shared/jemris_sources/angio_simu/simu
+jemris_flow2 simu_test.xml
+```
+
+The output should look like this: 
+
+```
+jemris 2.7.2 (5ae8ee4)
+
+-1 CALLS 100 TRAJECTORIES
+-1 number of trajectories loaded : 100
+Model    : Bloch	  , solver = CVODE
+Sample   : Vessels	  , spins  = 100
+TxArray  : ./uniform.xml
+RxArray  : ./uniform.xml
+Sequence : ./sequences/GRE.xml
+
+Simulating | ************************************************** | 100% done
+
+Actual simulation took 7.52 seconds.
+```
+
+Since we only want to check if the software runs correctly, what really matters is whether or not the test passes (i.e. reaches 100%). The simulation time is irrelevant here.
