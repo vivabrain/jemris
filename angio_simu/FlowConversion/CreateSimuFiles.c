@@ -80,10 +80,11 @@ int main (int argc, char *argv[])
 
 
 
-    int N=0,m=0,l=0,sep=0;
-    double t,tShift=0,tmem=-999999,grandissT=1,tmaxWritten=0,t_write;
+    int N=0,m=0,l=0,statSeed=0,sep=0;
+    double t,tShift=0,t_test,tmem=-999999,grandissT=1,tmaxWritten=0,t_write;
     float Dx=0,Dy=0,Dz=0,grandissX=1,grandissY=1,grandissZ=1;
     float x,y,z,xmem,ymem,zmem,xextrSup=-Dx,yextrSup=-Dy,zextrSup=-Dz,xextrInf=-Dx,yextrInf=-Dy,zextrInf=-Dz;
+    streampos pos;
 
     fstream spins("./particles.dat",ios::in);
     fstream flow("./Flow.dat",ios::out|ios::trunc);
@@ -106,13 +107,22 @@ int main (int argc, char *argv[])
                             if(t<0 && t!=-999999)
                                 {   cout<<"Error: negative time "<<t*grandissT<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl; continue; }
                             //Si le spin ne commence pas a t0
-                            //on ajoute une ligne a t0 identique a la premiere position connue (spin dŽsactivŽ)
+                            //on ajoute une ligne a t0 identique a la premiere position connue (spin desactive)
                             if(tmem==-999999 && t!=0) {
-                                t_write=0;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
-                                t_write=-222;flow<<t_write<<endl;
-                                t_write=0.000001;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
-                                t_write=-111;flow<<t_write<<endl;
-                                xmem=x;ymem=y;zmem=z; }
+								//Pas d'ecriture si une seule ligne de trajectoire
+								pos = spins.tellg();
+								spins>>t_test;
+								if(t_test==-999999)	{
+									statSeed++;
+									continue;  }
+								spins.seekg(pos);
+								//Ecriture sinon
+								t_write=0;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
+								t_write=-222;flow<<t_write<<endl;
+								t_write=t;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
+								t_write=-111;flow<<t_write<<endl;
+								xmem=x;ymem=y;zmem=z;
+							}
                             if(t==0)    { xmem=x;ymem=y;zmem=z; }
                             //Copie de la position du spin si deplacement non negligeable ou si t=t0
                             if(t==0 || sqrt(pow(x-xmem,2)+pow(y-ymem,2)+pow(z-zmem,2))>DISPLmin)    {
@@ -148,6 +158,7 @@ int main (int argc, char *argv[])
     spins.close();
     cout<<"Adding "<<sep<<" missing separators"<<endl;
     cout<<l<<" lines aborted inferior to min displacement (<"<<DISPLmin<<" mm)"<<endl;
+    cout<<statSeed<<" non moving spins aborted"<<endl;
     cout<<"t max written (ms): "<<tmaxWritten<<endl;
     cout<<"FOV extrema positions (mm): X:   "<<(xextrSup+Dx)*grandissX<<" Y:   "<<(yextrSup+Dy)*grandissY<<" Z:   "<<grandissZ*(zextrSup+Dz)<<endl;
     cout<<"                            X:  "<<(xextrInf+Dx)*grandissX<<" Y:  "<<(yextrInf+Dy)*grandissY<<" Z:  "<<grandissZ*(zextrInf+Dz)<<endl;
@@ -171,6 +182,7 @@ int main (int argc, char *argv[])
     fstream info("./particles_info.dat",ios::in);
     if(info.is_open())  {
         info>>TMP>>FlowLoopNumber;
+        FlowLoopNumber=FlowLoopNumber-statSeed;
         cout<<"FlowLoopNumber (loop last N trajectories): "<<FlowLoopNumber<<endl;
     }
     else {

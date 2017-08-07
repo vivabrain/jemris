@@ -66,8 +66,10 @@ in the same directory as the .dat files"""
         os.mkdir(dr)
 
     # open the file gathering all the particles
-    fpname = os.path.join(sys.argv[1], dr, "particles.dat")
-    fp = open(fpname, "w")
+    fpnameF = os.path.join(sys.argv[1], dr, "particles_fill.dat")
+    fpF = open(fpnameF, "w")
+    fpnameS = os.path.join(sys.argv[1], dr, "particles_seed.dat")
+    fpS = open(fpnameS, "w")
     # Build the file gathering all the particles into one file
     # iterate over the available indices
     N = 0
@@ -78,16 +80,25 @@ in the same directory as the .dat files"""
             fname = os.path.join(sys.argv[1], src + "." + str(i) + ".dat")
             if os.path.isfile(fname):
                 fl = open(fname, "r")
-                # write the data for the current particle
-                for ln in fl:
-                    fp.write(ln)
-                # write particle separator
-                fp.write("-999999\n\n")
-		        # count particles
-                N = N + 1
                 if ("Source" in src):
-					Nseed = Nseed + 1
-    fp.close()
+				    # write the data for the current particle
+				    for ln in fl:
+				        fpS.write(ln)
+				    # write particle separator
+				    fpS.write("-999999\n\n")
+				    # count particles
+				    N = N + 1
+                                    Nseed = Nseed + 1
+                else:
+					# write the data for the current particle
+					for ln in fl:
+						fpF.write(ln)
+					# write particle separator
+					fpF.write("-999999\n\n")
+					# count particles
+					N = N + 1
+    fpF.close()
+    fpS.close()
 
     #Print particles infos
     print "Seeding particles: ", Nseed
