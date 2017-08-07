@@ -1,5 +1,5 @@
 #Temp path to store data
-PTpath=/home/afortin/particles/FlowConversion
+PTpath=/tmp
 
 #Compile the project
 echo  "——————————————————————"
@@ -24,7 +24,7 @@ if [ -d "$PTpath/PT" ]; then
   echo "rm -R $PTpath/PT"
   rm -R $PTpath/PT
 fi
-vglrun pvpython ParticleTracer.py
+pvpython ParticleTracer.py
 
 
 #Convert to JEMRIS
@@ -50,7 +50,7 @@ cp SetSequence.c SetSequence.cpp
 g++ SetSequence.cpp -o SetSequence
 rm SetSequence.cpp
 ./SetSequence ConfigMRI.in
-rm ../FlowConversion_simu/simu_flowLoop.xml
-rm ../FlowConversion_simu/Flow.dat
-mv ./simu_flow.xml ../FlowConversion_simu/simu_flowLoop.xml
-mv ./Flow.dat ../FlowConversion_simu/Flow.dat
+rm ../simu/simu_flow.xml
+rm ../simu/Flow.dat
+mv ./simu_flow.xml ../simu/simu_flow.xml
+mv ./Flow.dat ../simu/Flow.dat
