@@ -56,8 +56,8 @@ int main (int argc, char *argv[]){
 	double Vmax=0;                   // mm/s peak velocity at the seeding entries (if highly variable, treat each entry separately)
 
 	double SphereCenter[3]={0,0,0};     //Coordinates of the center of the sample
-	double SphereRadius=10;             //Radius of the full filling shere
-	double NodesInterval=0.2;           //Mean spatial interval between neighboring nodes (defines the inter-particles distance)
+	double SphereRadius=0;             //Radius of the full filling shere
+	double NodesInterval=1;           //Mean spatial interval between neighboring nodes (defines the inter-particles distance)
 
 	double sphereVolume=(4./3.)*PI*pow(SphereRadius,3);
 	double NFillingPoints=sphereVolume/pow(NodesInterval,3);         //Total points number in the filling sphere
