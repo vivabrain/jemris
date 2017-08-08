@@ -50,17 +50,18 @@ bool CreateProgrammableFilter(const string FileName, const int N, const double S
 		File << "    os.mkdir('/tmp/PT')" << endl;
 		File << "ts = pdi.GetInformation().Get(vtk.vtkDataObject.DATA_TIME_STEP())" << endl;
 		if(steady)  {
-            File << "tshift = " << DeltaT << endl;
-            //File << "coord = pdi.GetPoint(0)" << endl;
-            //File << "x0, y0, z0 = coord[:3]" << endl;
+        File << "tshift = " << DeltaT << endl;
+        //File << "coord = pdi.GetPoint(0)" << endl;
+        //File << "x0, y0, z0 = coord[:3]" << endl;
 	    File << "if nbParts>0 and CPUrank<nbParts :"<< endl;
-        File << "   for i in range(CPUfirstPart,CPUlastPart):" << endl;
-        File << "        coord = pdi.GetPoint(i)" << endl;
-        File << "        x, y, z = coord[:3]" << endl;
-        //File << "        if (x0!=x or y0!=y or z0!=z):" << endl;
-        File << "        fl = open('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
-        File << "        fl.write(str(1000*(ts+tshift)) + \"\\t\" + str(x-"<<SphereCenter[0]<<") + \"\\t\" + str(y-"<<SphereCenter[1]<<") + \"\\t\" + str(z-"<<SphereCenter[2]<<") + \"\\n\")" << endl;
-        File << "        fl.close()" << endl;
+        File << "    for i in range(CPUfirstPart,CPUlastPart):" << endl;
+        File << "        if ptage.GetValue(i)>0:" << endl;  //Initial position not written (avoid static particles)
+        File << "            coord = pdi.GetPoint(i)" << endl;
+        File << "            x, y, z = coord[:3]" << endl;
+        //File << "            if (x0!=x or y0!=y or z0!=z):" << endl;
+        File << "            fl = open('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
+        File << "            fl.write(str(1000*(ts+tshift)) + \"\\t\" + str(x-"<<SphereCenter[0]<<") + \"\\t\" + str(y-"<<SphereCenter[1]<<") + \"\\t\" + str(z-"<<SphereCenter[2]<<") + \"\\n\")" << endl;
+        File << "            fl.close()" << endl;
         }
             //File << "    else:" << endl;
             //File << "        remove('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
@@ -69,18 +70,19 @@ bool CreateProgrammableFilter(const string FileName, const int N, const double S
             //File << "coord = pdi.GetPoint(0)" << endl;
             //File << "x0, y0, z0 = coord[:3]" << endl;
 	    File << "if nbParts>0 and CPUrank<nbParts :"<< endl;
-            File << "    for i in range(CPUfirstPart,CPUlastPart)::" << endl;
-            File << "        tseed=ts-ptage.GetValue(i)" << endl;
-            File << "        if "<<DeltaT<<"<=tseed and tseed<="<<tseedMax<<":" << endl;
-            File << "            coord = pdi.GetPoint(i)" << endl;
-            File << "            x, y, z = coord[:3]" << endl;
-            //File << "        if (x0!=x or y0!=y or z0!=z):" << endl;
-            File << "            fl = open('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
-            File << "            fl.write(str(1000*ts) + \"\\t\" + str(x-"<<SphereCenter[0]<<") + \"\\t\" + str(y-"<<SphereCenter[1]<<") + \"\\t\" + str(z-"<<SphereCenter[2]<<") + \"\\n\")" << endl;
-            File << "            fl.close()" << endl;
-            //File << "        else:" << endl;
-            //File << "             remove('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
-            //File << "        x0, y0, z0 = coord[:3]" << endl;
+		File << "    for i in range(CPUfirstPart,CPUlastPart):" << endl;
+		File << "        age=ptage.GetValue(i)" << endl;
+		File << "        tseed=ts-age" << endl;
+		File << "        if age>0 and "<<0.99*DeltaT<<"<=tseed and tseed<="<<tseedMax*1.01<<":" << endl; //Initial position not written (avoid static particles). Very first seeded particles not stored (superimposed with filling). Only particles seeded during first cycle are stored.
+		File << "            coord = pdi.GetPoint(i)" << endl;
+		File << "            x, y, z = coord[:3]" << endl;
+		//File << "        if (x0!=x or y0!=y or z0!=z):" << endl;
+		File << "            fl = open('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
+		File << "            fl.write(str(1000*ts) + \"\\t\" + str(x-"<<SphereCenter[0]<<") + \"\\t\" + str(y-"<<SphereCenter[1]<<") + \"\\t\" + str(z-"<<SphereCenter[2]<<") + \"\\n\")" << endl;
+		File << "            fl.close()" << endl;
+		//File << "        else:" << endl;
+		//File << "             remove('/tmp/PT/Source" << N << "part.' + str(int(ptids.GetTuple(i)[0])) + '.dat', 'a')" << endl;
+		//File << "        x0, y0, z0 = coord[:3]" << endl;
         }
 		File.close();
 		return true;

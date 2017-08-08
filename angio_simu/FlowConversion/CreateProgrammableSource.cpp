@@ -58,7 +58,7 @@ bool CreateProgrammableSource(const string FileName, double **Points, double **V
 		}
 	}
 	
-	int NTotalPoints = SourcePointsX.size();
+	long int NTotalPoints = SourcePointsX.size();
 	
 	//Write ProgrammableSource
 	{

@@ -39,8 +39,6 @@ bool CreateProgrammableFilter_fill(const string FileName, const double SphereCen
         File << "from mpi4py import MPI"<< endl;
 		File << "CPUrank = MPI.COMM_WORLD.Get_rank()"<< endl;
         File << "nbCores = MPI.COMM_WORLD.Get_size()"<< endl;
-        File << "if nbCores>nbParts:"<< endl;
-        File << "    print 'Warning: more MPI cores than particles for initial filling  (',nbCores,' cores for ', nbParts,' particles)'"<< endl;
         File << "nbPartsPerCPU = int(nbParts/nbCores)"<< endl;
         File << "CPUfirstPart = nbPartsPerCPU*CPUrank"<< endl;
         File << "CPUlastPart = min(nbParts, CPUfirstPart + nbPartsPerCPU - 1)"<< endl;
@@ -50,6 +48,8 @@ bool CreateProgrammableFilter_fill(const string FileName, const double SphereCen
 		File << "if(not os.path.exists('/tmp/PT')):" << endl;
 		File << "    os.mkdir('/tmp/PT')" << endl;
 		File << "ts = pdi.GetInformation().Get(vtk.vtkDataObject.DATA_TIME_STEP())" << endl;
+		File << "if nbCores>nbParts and ts==0:"<< endl;
+        File << "    print 'Warning: more MPI cores than particles for initial filling  (',nbCores,' cores for ', nbParts,' particles)'"<< endl;
 		//File << "coord = pdi.GetPoint(0)" << endl;
 		//File << "x0, y0, z0 = coord[:3]" << endl;
 		File << "if nbParts>0 and CPUrank<nbParts :"<< endl;

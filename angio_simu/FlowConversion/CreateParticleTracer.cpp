@@ -59,8 +59,8 @@ int main (int argc, char *argv[]){
 	double SphereRadius=0;             //Radius of the full filling shere
 	double NodesInterval=1;           //Mean spatial interval between neighboring nodes (defines the inter-particles distance)
 
-	double sphereVolume=(4./3.)*PI*pow(SphereRadius,3);
-	double NFillingPoints=sphereVolume/pow(NodesInterval,3);         //Total points number in the filling sphere
+	double	  sphereVolume=0;
+	long int  NFillingPoints=0;         //Total points number in the filling sphere
 
 	double DeltaT_max = 0.;
 
@@ -122,6 +122,9 @@ int main (int argc, char *argv[]){
     if(ForceReinjection==0)     FlowLoop<<DeltaT*1000<<" ms"<<endl;
     else                        FlowLoop<<CycleT*1000<<" ms"<<endl;
     FlowLoop.close();
+    //Calculate filling sphere properties
+    sphereVolume=(4./3.)*PI*pow(SphereRadius,3);
+    NFillingPoints=ceil(sphereVolume/pow(NodesInterval,3));
 
 
 	//Read VTK File
