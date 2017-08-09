@@ -119,7 +119,7 @@ int main (int argc, char *argv[])
 								//Ecriture sinon
 								t_write=0;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
 								t_write=-222;flow<<t_write<<endl;
-								t_write=t;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
+								t_write=t*grandissT;flow<<t_write<<"   "<<(x+Dx)*grandissX<<" "<<(y+Dy)*grandissY<<" "<<grandissZ*(z+Dz)<<endl;
 								t_write=-111;flow<<t_write<<endl;
 								xmem=x;ymem=y;zmem=z;
 							}
