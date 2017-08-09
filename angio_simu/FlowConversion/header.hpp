@@ -60,7 +60,7 @@ bool CreateProgrammableFilter_fill(const string FileName, const double SphereCen
 bool CreatePVD(const string DataFile,
 			const double FinalT, const double DeltaT);
 
-bool CreateParticleTracer(const string *ProgrammableSourceFile, const string *ProgrammableFilterFile, const unsigned int NLabels, const unsigned int ForceReinjection, const double SphereCenter[3], const double SphereRadius, const double NFillingPoints);
+bool CreateParticleTracer(const string *ProgrammableSourceFile, const string *ProgrammableFilterFile, const unsigned int NLabels, const unsigned int ForceReinjection, const double SphereCenter[3], const double SphereRadius, const long int NFillingPoints);
 
 
 #endif

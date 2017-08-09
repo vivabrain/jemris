@@ -251,7 +251,7 @@ int main (int argc, char *argv[]){
 
 
 
-bool CreateParticleTracer(const string *ProgrammableSourceFile, const string *ProgrammableFilterFile, const unsigned int NLabels, const unsigned int ForceReinjection, const double SphereCenter[3], const double SphereRadius, const double NFillingPoints){
+bool CreateParticleTracer(const string *ProgrammableSourceFile, const string *ProgrammableFilterFile, const unsigned int NLabels, const unsigned int ForceReinjection, const double SphereCenter[3], const double SphereRadius, const long int NFillingPoints){
 	ofstream File("ParticleTracer.py", ios::out | ios::trunc);
 	unsigned int i;
 	if (File){
