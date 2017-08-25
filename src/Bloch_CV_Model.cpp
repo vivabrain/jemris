@@ -105,7 +105,7 @@ inline static int bloch (realtype rt, N_Vector y, N_Vector ydot, void *pWorld) {
     dv->m_M0->GetValue(time, &m0);
 
 //MODIF
-    //check spin active: if not, set transv. magnetization to 0 and longit. component to 0
+    //check spin active: if not, set transv. magnetization to 0
     if (! dv->m_Flow->spinActivation(pW->SpinNumber)) {
     	NV_Ith_S(y,AMPL) = 0;
     	NV_Ith_S(ydot,PHASE) = 0;
