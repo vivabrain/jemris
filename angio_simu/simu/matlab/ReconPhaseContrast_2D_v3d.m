@@ -103,7 +103,7 @@ kspace= log(abs(sum(rawData,4)));
 magnX = abs(image0-imageX);
 magnY = abs(image0-imageY);
 magnZ = abs(image0-imageZ);
-SumMagn = magnX + magnY + magnZ;
+SumMagn = sqrt(magnX.*magnX + magnY.*magnY + magnZ.*magnZ);
 %Phase and velocity images
 phX = angle(image0./imageX);
 phY = angle(image0./imageY);
