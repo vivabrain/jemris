@@ -1,6 +1,6 @@
 ### Angiography simulations with Jemris ###
 
-#The flow file can be ASCII or HDF5 with the following format (quadruple the indicators for HDF5):
+#The flow file can be ASCII or HDF5 with the following format (quadruple the negative indicators for HDF5):
 
 	t0 spin0_x spin0_y spin0_z
 	-111				<- SPIN ACTIVATION
