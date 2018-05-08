@@ -36,8 +36,8 @@ git checkout flow_loop
 To be able to compile JEMRIS while keeping the source directory unaltered, create an other directory and copy all source files inside it:
 
 ```
-mkdir ~/shared/jemris_sources
-cp -r ~/shared/git/jemris/* ~/shared/jemris_sources/
+mkdir ~/shared/jemris_build
+cp -r ~/shared/git/jemris/* ~/shared/jemris_build/
 ```
 
 ### Starting docker
@@ -62,7 +62,7 @@ sudo apt-get install libginac-dev
 Use `configure` to prepare JEMRIS compiling, with the necessary options:
 
 ```
-cd ~/shared/jemris_sources
+cd ~/shared/jemris_build
 ./configure --prefix=/usr/local/share/JEMRIS_flow2/ \
 				--program-suffix=_flow2  \
 				--enable-boost \
@@ -107,7 +107,7 @@ Testsuite summary for jemris 2.7.2
 ============================================================================
 ```
 
-If any test fail, make sure the JEMRIS dependencies are installed and check the previously mentioned `configure` options were typed correctly. In particular, if you chose to disable boost in the `configure` step, 1 test should fail as it needs boost. 
+If any test fail, make sure the JEMRIS dependencies are installed and check the previously mentioned `configure` options were typed correctly. In particular, if you chose to disable the boost library in the `configure` step, `testcoils.sh` should fail as it requires the boost library. 
 
 When you are satisfied with the tests results, proceed to install JEMRIS:
 
@@ -124,7 +124,7 @@ The installation procedure is the same, except we switch to the `feature/flow_lo
 ```
 cd ~/shared/git/jemris
 git checkout feature/flow_loop_simulations
-cd ~/shared/jemris_sources
+cd ~/shared/jemris_build
 rm -rf *
 cp -r ~/shared/git/jemris/* .
 ```
@@ -144,7 +144,7 @@ sudo apt-get update && sudo apt-get install libginac-dev
 Prepare JEMRIS compilation with `configure`:
 
 ```
-cd ~/shared/jemris_sources
+cd ~/shared/jemris_build
 ./configure --prefix=/usr/local/share/JEMRIS_flow2/ --program-suffix=_flow2 --enable-boost --disable-mpi --with-hdf5 --enable-silent-rules --bindir="/usr/local/bin" CPPFLAGS="-I/usr/local/include -I/usr/include/hdf5/serial" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/hdf5/serial" CXXFLAGS="-std=c++11"
 ```
 
@@ -159,7 +159,7 @@ make -j 4 && make check && sudo make install
 Now we can test the flow extension. 
 
 ```
-cd ~/shared/jemris_sources/angio_simu/simu
+cd ~/shared/jemris_build/angio_simu/simu
 jemris_flow2 simu_test.xml
 ```
 
